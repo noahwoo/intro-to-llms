@@ -336,21 +336,50 @@ What we want from finetuning:
 
 ---
 ## Design aspects
-- **Finetune Modules**: head-attention(Prefix Tuning), attention(Adapter/LoRA), ffn(Adapter), key/value tranform matrix(LoRA)
-- **Composition method**: $h \leftarrow h + s \Delta h$ or $h \leftarrow (1-\lambda(x)) h + \lambda(x) \Delta h$ (PrefixTuning)
-- **Modifier $\Delta h$**: 
-  - low rank bottleneck: $f(v W_1)W_2, W_1 \in R^{d \times l}, W_2 \in R^{l \times (d|d_h)}$
-  - $v$: PLM layer input $x$(Prefix Tuning/LoRA) or (head-)attention $h$(Adapter) 
-  - $f$: Identity mapping(LoRA), ReLU activation function(Adapter), Softmax function(Prefix Tuning)
-  - parallel(PrefixTuning/LoRA) or sequential(Adapter)
-  - scaling or not: yes(LoRA), no(Prefix Tuning/Adapter)
+- **Finetuned Modules**:
+  - Attention-key/value matrix: LoRA(Q/V)
+  - Attention-head: Prefix-Tuning(K/V)
+  - Attention: Adapter
+  - Feedfoward Network: Adapter
+- ****:
+
 ---
 ## Adapter
 
+- Implementation & training notes
+
+<!-- _footer: '[Adapter: Parameter-Efficient Transfer Learning for NLP, Google, 2019](https://arxiv.org/abs/1902.00751)'-->
+
 ---
 ## Prefix-Tuning
+
+- Implementation & training notes
+
+<!-- _footer: '[PrefixTuning: Optimizing Continuous Prompts for Generation, Stanford, 2021](https://arxiv.org/abs/2101.00190) <br> [PromptTuning: The Power of Scale for Parameter-Efficient Prompt Tuning, Google, 2021](https://arxiv.org/abs/2104.08691)' -->
 ---
 ## LoRA
+- Implementation & training notes
+  - Transformer: $W = W_0 + (BA)^T, A \in R^{r \times d}, B \in R^{d_h \times r}, r \ll \min \{d_h, d\}$
+  - **Query** and **value** projection matrix considered
+  - Modularized: `Embedding`, `Linear`, `MergedLinear`, `Conv2D`
+  - Initialization: $A$ kaiming-random, $B$ zeros
+  - Weight merged for inference efficiency
+- Results
+  - For 175B GPT-3 finetuning: 1/10,000 parameters , on par or better results
+  - No additional inference computation and latency
+  - Additivity for **finetuning merge** and **incremental update**
+
+<!-- _footer: '[LoRA: Low-Rank Adaptation of Large Language Models, Microsoft, 2021](https://arxiv.org/abs/2106.09685)' -->
+
+---
+
+## More on LoRA paper
+
+| ![width:400px](img/lora-which-part-to-update.png) |
+| ![width:400px](img/lora-how-to-set-r.png) |
+
+<!-- _footer: '[LoRA: Low-Rank Adaptation of Large Language Models, Microsoft, 2021](https://arxiv.org/abs/2106.09685)' -->
+
 ---
 <!-- _backgroundColor : gray -->
 <!-- _color : white -->

@@ -1,9 +1,11 @@
 ---
 marp: true
 theme: default
-footer: 'https://example.com'
+paginate : true
+_class : lead
+
 style: |
-  .columns {
+  .columns2 {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1rem;
@@ -29,97 +31,425 @@ style: |
     max-height: 600px; 
   }
 
+  img + br + em {
+    font-style: normal;
+    display: inherit;
+    text-align: center;
+    font-size: 90%;
+  }
+
   @import 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css'
+
+math: mathjax
 ---
 
-# My Presentation
-![bg right](https://picsum.photos/800/600)
+<!-- _paginate : false -->
+# <!-- fit --> **Introduction to Large Language Models(LLM)**
 
 ---
-
 <!-- Speaker Notes -->
-## Slide 1
-
-- Item 1
-- Item 2
-- Item 3
-<!-- Can have multiple on a slide -->
-
----
-
-## Slide 2
-<!-- Can also do a multiline
-comment that will show in notes -->
-
-![Image](https://picsum.photos/800/600)
+## Outline
+1. [Overview from 30,000 feet above](#overview-from-30000-feet-above)
+1. [Transformer in nutshell](#transformer-in-nutshell)
+1. [Pretraining - Parallel paradigm](#pretraining)
+1. [Finetuning - Parameter efficient finetuning](#finetuning)
+1. [Steering the decoding of LLM - Prompting](#steering-the-decoding-process-of-llm)
+1. [Augmentation and Plugins](#augmentation-and-plugins)
 
 ---
 
-## Slide 3
+## Overview from 30000 feet above
+- Paradigm transition in AI
+  - From: **training**(specific) -> **prediction**(specific)
+  - To: **pretraining**(general) -> **finetuning**(general/specific) -> **in-context prompting**(specific)
+- Primary steps of new paradigm
+  - Pretraining with self-supervised learning
+  - Finetuning on instruction from mutiple domains
+  - Application by steering the decoding process of LLM
+- Where are we to AGI?
+  - From explanation to prediction
+  - From correlation to causality
+---
+## A LLMs tree
+![bg right:60% w:700px](img/llm-tree.png)
 
-> This is a quote.
+- Decoder Only
+- Encoder Only
+- Encoder-Decoder
+<!-- _footer : 'Img Source: [Jingfeng Yang et al. 2023](https://arxiv.org/abs/2304.13712)' -->
 
 ---
-
-## Slide 4
-
-| Column 1 | Column 2 |
-| -------- | -------- |
-| Item 1   | Item 2   |
-| Item 3   | Item 4   |
+<!-- _backgroundColor : black -->
+<!-- _color : white -->
+## Transformer in nutshell
+- Transformer modules
+- Aspects of alternative
+- Parameter concentration
+- Computation concentration
 
 ---
-
-![bg opacity](https://picsum.photos/800/600?image=53)
-## Slide 5
-
-<div class="columns">
+## Transformer modules
+<div class='columns2'>
 <div>
 
-## Left
-
-- 1
-- 2
+- Token & positional embedding : 
+  - $E \in R^{V \times d}$, $P \in R^{T \times d}$ 
+- Multi-head attention
+  - Self-attention & Cross-attention
+    - Weight matrix: $W_Q^h, W_K^h, W_V^h \in R^{d \times d_h}$
+    - Head projection: $W_O \in R^{d \times d}$
+- ResNet & LayerNorm
+- Feedfoward Network
+  - $W_1 \in R^{d \times 4d}$, $W_2 \in R^{4d \times d}$
+- Output head: task related
 
 </div>
 <div>
 
-## Right
-
-- 3
-- 4
+|![w:500px](img/The-Transformer-model-architecture.png)|
+|:--:|
+| <font color='gray' size='4'>Source : [Wiki:Transformer_(machine_learning_model)](https://en.wikipedia.org/wiki/Transformer_(machine_learning_model))</font>|
 
 </div>
 </div>
 
+<!-- _footer: '[nanoGPT](https://github.com/karpathy/nanoGPT)' -->
+---
+## Aspects of alternative
+- Efficient Transformer (for long sequence)
+  - Coarse sequence resolution: 
+    - Block/Stride/Clustering/Neural Memory
+    - TransformerXL
+  - Attention matrix approximation:
+    - Linear Transformer
+- LLMs specific
+  - **Encoder** vs **Decoder** vs **Encoder-Decoder**
+  - Pretraining objective
+  - Positional encoding
+  - Input or output LayerNorm
+  - Activation
 ---
 
-## Slide 6
+## Parameter concentration
+**Decoder only** Transformer(GPT)
+- Parameter size: 
+   - Embedding: $(V + T) \times d$
+   - Attention: $L \times (3 \times d \times d_h \times H  + (d_h \times H) \times d) = 4Ld^2$
+   - FFN: $L \times ((d \times 4d + 4d) + (4d \times d + d)) \approx 8Ld^2$
+- On GPT3-175B:
 
-<i class="fa-brands fa-twitter"></i> Twitter: 
-<i class="fa-brands fa-mastodon"></i> Mastodon: 
-<i class="fa-brands fa-linkedin"></i> LinkedIn: 
-<i class="fa fa-window-maximize"></i> Blog: 
-<i class="fa-brands fa-github"></i> GitHub: 
+ | Total | PE | TE | Attn | FFN | 
+ | --- | --- | --- | --- | --- | 
+ | 174,597M | 25M(0.01%) | 617M(0.35%) | 57,982M(33.21%) | 115,970M(66.42%) |
+
+<!-- - Parameter report in [Table 2.1 in GPT3 paper](https://arxiv.org/abs/2005.14165) -->
+<!-- ![w:500px](img/gpt3-parameter-scale.jpeg) -->
+ 
+---
+## Computation concentration 
+**Decoder only** Transformer
+Per-token calculation:
+- QKV+project: $2 \times L \times (3 \times H \times h_d \times d + (H \times h_d) \times d) = 2 \times 4Ld^2$
+- Attention: $2 \times L \times T \times d$
+- FFN: $2 \times L \times ((d \times 4d + 4d) + (4d \times d + d)) \approx 2 \times 8Ld^2$
+
+Model training flops utilization(MFU):
+- Forward and backward: $(1+2) \times (2N + 2LTd) \approx 6N$, where $N \approx 12Ld^2$
+- Theoretical peak throughput: $\frac{P}{6N+6LTd}$
+- $\text{MFU}=\frac{\text{Observed throughput}}{\text{Theoretical peak throughtput}}$
+
+---
+<!-- _backgroundColor : black -->
+<!-- _color : white -->
+
+## Pretraining
+- Training objectives
+- Text Corpus
+- Parallel strategies
+- Results & Evaluation
+
+---
+## Training objectives
+- Auto-regressive Language Models
+- Missing token prediction
+
+---
+## Text Corpus
+- Unsupervised text
+  - [BookCorpus](https://yknzhu.wixsite.com/mbweb): 7000 unpublished books
+  - [WebText](https://huggingface.co/datasets/openwebtext): 8M outlinks of Reddit.com
+  - [Common Crawl](https://commoncrawl.org/)
+- Week supervised text
+  - Summarization: [Reddit TL;DR](https://huggingface.co/datasets/reddit)
+  - QA: [StackExchange]()
+- Supervised text
+  - Summarization: 
+  - Q&A: 
+  - Dialog: InstructGPT
+
+![bg right:30% fit](img/img-canvas/dataset.png)
+
+---
+<!-- _backgroundColor : gray -->
+<!-- _color : white -->
+## Parallel strategies
+- Why bother?
+- Four parallel paradigms
+  - Data parallel
+  - Model parallel
+    - Tensor parallel
+    - Pipeline parallel
+  - Sequence parallel 
+- Combined implementations
+---
+### Why bother?
+---
+### Data parallel
+---
+### Tensor parallel
+---
+### Pipeline parallel
+---
+### Sequence parallel
+---
+### Combined implementations
+---
+<!-- _backgroundColor : gray -->
+<!-- _color : white --> 
+## <!-- fixing --> End of Parallel strategies
+---
+## Result & Evaluations
+---
+<!-- _backgroundColor : black -->
+<!-- _color : white -->
+## Finetuning
+- Target and issues
+- Instruct finetuning
+- Finetuning for specific task
+- Parameter efficient finetuning
 
 ---
 
-# <!--fit--> Large Text
+## Target and issues
+- Target
+  - From pattern completion to real world tasks
+- Issues
+  - Instruction following
+  - Hallucination
+  - Toxicity and ethics
+  - Securities
+
+---
+## Instruct Finetuning
+
+Key to success
+- Number of finetuning datasets: 
+  - scaling from 62 text datasets to 18K
+- Model scale: 137B LaMDA-PT
+- Natural language instructions
+
+![bg fit right:50%](img/instruct-finetuning.png)
+
+<!-- _footer: '[Finetuned Language Models Are Zero-Shot Learners, 2021, Google](https://arxiv.org/abs/2109.01652)<br> [Scaling Instruction-Finetuned Language Models, 2022, Google](https://arxiv.org/abs/2210.11416)' -->
+---
+
+## Finetuning for specific task
+
+<style>
+img[alt~="center"] {
+  display: block;
+  margin: 0 auto;
+}
+</style>
+
+![width:900px center](img/img-canvas/fine-tune.png)
+
+<!-- _footer: '[Finetune from HF(OpenAI):1909.08593](https://arxiv.org/abs/1909.08593)  <br> [Summarize from HF(OpenAI):2009.01325](https://arxiv.org/abs/2009.01325) <br> [HHHA(Anthropic):2112.00861](https://arxiv.org/abs/2112.00861) <br> [InstructGPT(OpenAI):2203.02155](https://arxiv.org/abs/2203.02155) <br> [HHA(Anthropic):2204.05862](https://arxiv.org/abs/2204.05862) <br>[Sparrow(Deepmind):2209.14375](https://arxiv.org/abs/2209.14375)'-->
+
+--- 
+
+### Problems from Supervised Finetuning(SFT)
+- Learning only the task format and the way to response for the format
+- Knowledge labeled but not in the LLM leads to more hallucination
+- Knowledge in the LLM but labeled as `don't know` leads to withhold information
+
+What we want from finetuning: 
+> outputs its(LLM's) state of knowledge with the correct amount of hedging and expressing its uncertainty
+
+<!-- _footer: '[Talk of John Schulman @ EECS Berkeley, 2023/4/24](https://news.berkeley.edu/2023/04/24/berkeley-talks-transcript-chatgpt-developer-john-schulman/)'-->
 
 ---
 
-<!-- Needed for mermaid, can be anywhere in file except frontmatter -->
-<script type="module">
-  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-  mermaid.initialize({ startOnLoad: true });
-</script>
+### Advance of RL to SFT for truthfullness
+- LLMs know what they know
+  - Calibrated probability, uncertainty
+- RLHF can leverage the self-awareness
+  - Design reward function: `correct answer=1`, `don't know=0` and `wrong answer=-4`
+  - RL learn optimal threshold of probability to maximize the reward
+- No oracle for the correctness, delegate to Reward Model
+  - Reward model: **relative criteria** trained by pairwise loss from human feedback
+  - Open problem: true probabilites of everything?
+  - Open problem: go beyond things that labelers can easily do
+    - Verification is easier than generation
 
-# Mermaid
+<!-- _footer: '[Anthropic: 2207.05221](https://arxiv.org/abs/2207.05221) <br> [Talk of John Schulman @ EECS Berkeley, 2023/4/24](https://news.berkeley.edu/2023/04/24/berkeley-talks-transcript-chatgpt-developer-john-schulman/)'-->
 
-<div class="mermaid">
-graph TD;
-    A-->B;
-    A-->C;
-    B-->D;
-    C-->D;
-</div>
+---
+
+## More on Reinforcement Learning
+
+- Catalog of algorithms(**PPO belongs**)
+  - World model or **model free**
+  - Value-based or **policy-based(actor-critic)**
+  - MC or **TD bootstrapping**
+  - Off-policy or **on-policy**
+  - Deterministic or **stochastic** policy
+- Design consideration
+  - **Sample efficiency**: Off-policy > On-policy
+  - **Stability & Convergence**: Deadly Triad issue
+  - **Explore & Exploit**: Random at episode beginning
+  - **Bias & Variance**: Advantage Function
+
+![bg fit right:30%](img/img-canvas/rlfh.png)
+
+<!-- _footer: '[SpinningUp: OpenAI](https://spinningup.openai.com/en/latest/)' -->
+
+--- 
+
+<!-- _backgroundColor : gray -->
+<!-- _color : white --> 
+## Parameter Efficient Finetuning
+
+- Design aspects
+- Primary implementations
+  - Adapter
+  - Prefix-tuning
+  - LoRA
+
+---
+
+## Overall 
+
+| ![width:400px](img/peft-allinone.png) | ![width:400px](img/peft-summerization.png) |
+| -- | -- |
+|<| PEFT illustration and performance comparison (Source: [Junxian He, et.al](https://arxiv.org/abs/2110.04366)) |
+
+---
+## Design aspects
+- **Finetune Modules**: head-attention(Prefix Tuning), attention(Adapter/LoRA), ffn(Adapter), key/value tranform matrix(LoRA)
+- **Composition method**: $h \leftarrow h + s \Delta h$ or $h \leftarrow (1-\lambda(x)) h + \lambda(x) \Delta h$ (PrefixTuning)
+- **Modifier $\Delta h$**: 
+  - low rank bottleneck: $f(v W_1)W_2, W_1 \in R^{d \times l}, W_2 \in R^{l \times (d|d_h)}$
+  - $v$: PLM layer input $x$(Prefix Tuning/LoRA) or (head-)attention $h$(Adapter) 
+  - $f$: Identity mapping(LoRA), ReLU activation function(Adapter), Softmax function(Prefix Tuning)
+  - parallel(PrefixTuning/LoRA) or sequential(Adapter)
+  - scaling or not: yes(LoRA), no(Prefix Tuning/Adapter)
+---
+## Adapter
+
+---
+## Prefix-Tuning
+---
+## LoRA
+---
+<!-- _backgroundColor : gray -->
+<!-- _color : white -->
+## End of Parameter Efficient Finetuning
+---
+
+<!-- _backgroundColor : black -->
+<!-- _color : white -->
+## Steering the decoding process of LLM
+- Decoding strategies
+- Prompt enginneering
+---
+## Decoding strategies
+- Temperature in decoding: $p_i = \frac{\exp(o_i/T)}{\sum_j \exp(o_j/T)}$
+- Maximization search
+  - Greedy search
+  - Beam search
+- Sampling
+  - top-K sampling
+  - top-p(Nucleus) sampling
+  - Repetition penalized sampling
+- Guided decoding
+  - $score(x_{t+1}, b_{t}) = score(b_{t}) + \log p(x_{t+1}) + \sum_i \alpha_i f_i(x_{t+1})$
+---
+
+## Prompting engineering
+- Instruction/Zero-shot prompting
+- Few-shot Prompting
+- In-context Learning(Prompting)
+- Chain-of-Thought
+
+---
+
+## More on In-context Learning
+Why it works? 
+- Interpretation from Topic Model
+- Induction head
+- View from gradient descent
+
+---
+
+<!-- _backgroundColor : black -->
+<!-- _color : white -->
+## Augmentation and Plugins
+- Augmented Language Models
+- Automatic prompting
+- Plugins
+
+---
+
+<!-- _backgroundColor : gray -->
+<!-- _color : white -->
+## Augmented Language Models
+- Problems in vanilla LLMs
+- Two augment aspects
+   - Retrieval augmented language models
+   - Tool augmented language models
+
+---
+## Problems in vailla LLMs
+---
+## Retrieval augmented language models
+---
+## Tool augmented language models
+---
+<!-- _backgroundColor : gray -->
+<!-- _color : white -->
+## End of Augmented Language Models
+---
+## Automatic prompting
+---
+<!-- _backgroundColor : gray -->
+<!-- _color : white -->
+## Plugins
+- Plugins ecosystem
+- Primary implementations
+  - Langchain Agent/Tool
+  - ChatGPT Plugins
+  - Fixie
+  - Other paradigm proposal
+---
+## Plugins ecosystem
+- Tool as a service
+- From SEO to LMO
+- Orchestration by LLM
+
+---
+## Langchain Agent/Tool
+---
+## ChatGPT Plugins
+---
+## Fixie
+---
+## Other paradigm proposal
+---
+<!-- _backgroundColor : gray -->
+<!-- _color : white -->
+## End of Plugins
+
+---
+
+Thanks & QA? 

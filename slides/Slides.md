@@ -202,17 +202,48 @@ Model training flops utilization(MFU):
   - Sequence parallel 
 - Combined implementations
 ---
+
 ### Why bother?
+
+- Too big to fit in single GPU memory
+  - 175B: 350GB in fp16, $\sim 3 \times 350$GB for training
+    - Model: parameter, gradient, optimizer states(momentum, variance), activation
+  - A100 spec: 
+    - GPU memory: 80GB
+    - GPU memory bandwidth: 2039GB/s; NVLink: 600GB/s; PCIe 4.0: 64GB/s
+    - tf32: 156TFlops
+- Speedup
+  - Scales linearly with # of cores? 
+
 ---
-### Data parallel
+### Data parallel: DDP/FSDP/Deepspeed
+- Design Aspects
+  - Storage: whole model
+  - Computation & communication overlap: yes
+  - Transformer only: DP no, FSDP/Deepspeed yes
+
+<!-- _footer: '[ZeRO: Memory Optimizations Toward Training Trillion Parameter Models, Microsoft, 2019](https://arxiv.org/abs/1910.02054) <br> ' -->
+
 ---
-### Tensor parallel
+### Tensor parallel: Megatron-LM
+
+<!-- _footer: '[Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism, Nvida, 2019](https://arxiv.org/abs/1909.08053)' -->
+
 ---
-### Pipeline parallel
+### Pipeline parallel: GPipe
+
+<!-- _footer: '[GPipe: Efficient Training of Giant Neural Networks using Pipeline Parallelism, Google, 2018](https://arxiv.org/abs/1811.06965)' -->
+
 ---
 ### Sequence parallel
+
+<!-- _footer: '[Sequence Parallelism: Long Sequence Training from System Perspective, HPC-AI, 2021](https://arxiv.org/abs/2105.13120)'-->
+
 ---
-### Combined implementations
+### Combined implementations: Megatron-DeepSpeed/ColossalAI
+
+<!-- _footer: '[Colossal-AI: A Unified Deep Learning System For Large-Scale Parallel Training, HPC-AI, 2021](https://arxiv.org/abs/2110.14883) <br> [Megatron-DeepSpeed](https://github.com/microsoft/Megatron-DeepSpeed)' -->
+
 ---
 <!-- _backgroundColor : gray -->
 <!-- _color : white --> 
@@ -328,44 +359,80 @@ What we want from finetuning:
 
 ---
 
-## Overall 
+## Methods and performance on Summerization task
 
 | ![width:400px](img/peft-allinone.png) | ![width:400px](img/peft-summerization.png) |
 | -- | -- |
-|<| PEFT illustration and performance comparison (Source: [Junxian He, et.al](https://arxiv.org/abs/2110.04366)) |
+| <td colspan='2'> PEFT illustration and performance comparison (Source: [Junxian He, et.al](https://arxiv.org/abs/2110.04366)) |
 
 ---
+
 ## Design aspects
 - **Finetuned Modules**:
   - Attention-key/value matrix: LoRA(Q/V)
   - Attention-head: Prefix-Tuning(K/V)
   - Attention: Adapter
-  - Feedfoward Network: Adapter
-- ****:
+  - After FFN: Adapter
+- **Other aspects**:
+  - Multi-task consideration
+  - Task related head
 
 ---
 ## Adapter
 
 - Implementation & training notes
+  - $h \leftarrow h + f(h W_{\text{down}})W_{\text{up}}$
+  - Parameter scale: $2 \times L \times (r \times d + r + d), r \ll d$
+  - Adapt after FFN sub-layer works too
+- Results
+  - Finetune BERT for 26 classification Tasks
+    - 3.6% parameters for 0.4% GLUE performance gap
+  - Ablation: fewer layers adapted -> worser performance
+
+![bg right:30% fit](img/adapter-perf.png)
 
 <!-- _footer: '[Adapter: Parameter-Efficient Transfer Learning for NLP, Google, 2019](https://arxiv.org/abs/1902.00751)'-->
 
 ---
 ## Prefix-Tuning
 
-- Implementation & training notes
+- Implementation
+  - $\text{head} = \text{Attn}(X W_Q, [P_K; XW_K], [P_V; XW_V])$
+  - Reparameterization for finetuning stability: 
+    - $[P_K, P_V] = \text{MLP}_\theta (P^E)$
+    - $P^E$: prefix embedding
+- Parameter scale: 
+  - Vanilla: $|P| \times d \times 2 \times L$
+  - Reparameteration: $|P| \times d + d \times H + H \times d \times 2 \times L$ 
 
-<!-- _footer: '[PrefixTuning: Optimizing Continuous Prompts for Generation, Stanford, 2021](https://arxiv.org/abs/2101.00190) <br> [PromptTuning: The Power of Scale for Parameter-Efficient Prompt Tuning, Google, 2021](https://arxiv.org/abs/2104.08691)' -->
+![bg right:30% fit](img/img-canvas/dataset.png)
+
+<!-- _footer: '[PrefixTuning: Optimizing Continuous Prompts for Generation, Stanford, 2021](https://arxiv.org/abs/2101.00190)' -->
+
+---
+## More on Prefix-Tuning: Training and scaling
+- Training
+  - Initialization: 
+    - Real/high frequency words activation
+    - *Task relevant words* / *Classification labels*
+  - LM Head: Next Token/Class Label
+- Results & discussion
+  - Finetuning $0.1\% \sim 3\%$ parameters, comparable or better performance
+  - Optimal prefix length varies: longer for more complex tasks
+  - Reparameterization works task-dependently
+
+<!-- _footer: '[PrefixTuning: Optimizing Continuous Prompts for Generation, Stanford, 2021](https://arxiv.org/abs/2101.00190) <br> [PromptTuning: The Power of Scale for Parameter-Efficient Prompt Tuning, Google, 2021](https://arxiv.org/abs/2104.08691) <br> [P-Tuning v2: Prompt Tuning Can Be Comparable to Fine-tuning Universally Across Scales and Tasks, Tsinghua, 2021](https://arxiv.org/abs/2110.07602)' -->
+
 ---
 ## LoRA
 - Implementation & training notes
   - Transformer: $W = W_0 + (BA)^T, A \in R^{r \times d}, B \in R^{d_h \times r}, r \ll \min \{d_h, d\}$
-  - **Query** and **value** projection matrix considered
+  - $W_Q$ and $W_V$ considered, parameter scale: $2 \times 2 \times d \times r \times L$
   - Modularized: `Embedding`, `Linear`, `MergedLinear`, `Conv2D`
   - Initialization: $A$ kaiming-random, $B$ zeros
   - Weight merged for inference efficiency
 - Results
-  - For 175B GPT-3 finetuning: 1/10,000 parameters , on par or better results
+  - For 175B GPT-3 finetuning: 0.01% parameters , on par or better results
   - No additional inference computation and latency
   - Additivity for **finetuning merge** and **incremental update**
 
@@ -373,10 +440,10 @@ What we want from finetuning:
 
 ---
 
-## More on LoRA paper
+## More on LoRA: which part to update & rank settings 
 
-| ![width:400px](img/lora-which-part-to-update.png) |
-| ![width:400px](img/lora-how-to-set-r.png) |
+![width:800px](img/lora-which-part-to-update.png)
+![width:800px](img/lora-how-to-set-r.png)
 
 <!-- _footer: '[LoRA: Low-Rank Adaptation of Large Language Models, Microsoft, 2021](https://arxiv.org/abs/2106.09685)' -->
 

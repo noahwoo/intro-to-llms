@@ -206,21 +206,93 @@ Model training flops utilization(MFU):
 ### Why bother?
 
 - Too big to fit in single GPU memory
-  - 175B: 350GB in fp16, $\sim 3 \times 350$GB for training
-    - Model: parameter, gradient, optimizer states(momentum, variance), activation
-  - A100 spec: 
+  - 175B: $\sim (2+2+3 \times 4) \times 175=2800$GB for mixed-precision training
+    - Parameter & gradient(FP16): parameter, gradient
+    - Optimizer State(FP32): parameter, momentum, variance
+    - Activation(FP16): $2 \times (1 + 4 + 1) \times d \times B \times T \times L$
+  - A100 Spec: 
     - GPU memory: 80GB
     - GPU memory bandwidth: 2039GB/s; NVLink: 600GB/s; PCIe 4.0: 64GB/s
-    - tf32: 156TFlops
+    - TF32: 156TFlops
 - Speedup
   - Scales linearly with # of cores? 
 
 ---
-### Data parallel: DDP/FSDP/Deepspeed
-- Design Aspects
-  - Storage: whole model
-  - Computation & communication overlap: yes
-  - Transformer only: DP no, FSDP/Deepspeed yes
+### Basics on Forward & Backward and Parallel Ops
+
+![width:400px](img/img-canvas/forward-backward.png)
+
+<div class='columns2'>
+
+<div>
+
+Forward: 
+$h_0 = \sigma (z_0)$ 
+$z_1 = W^T h_0 + b$
+$h_1 = \sigma (z_1)$
+
+</div>
+
+<div>
+
+Backward:
+$(\frac{\partial L}{\partial h_1},W) \rightarrow \frac{\partial L}{\partial h_0}$
+$(\frac{\partial L}{\partial h_1}, h_0) \rightarrow \Delta \frac{\partial L}{\partial W}$
+$m \leftarrow \beta_1 m + (1-\beta_1) \frac{\partial L}{\partial W}$
+$v \leftarrow \beta_2 v + (1-\beta_2) \left( \frac{\partial L}{\partial W} \right)^2$
+$W \leftarrow W - \frac{\alpha}{\sqrt{\hat{v}}+\epsilon} \hat{m}$
+</div>
+
+</div>
+
+![bg right:30% width:300px](image/../img/img-canvas/para-ops.png)
+
+---
+### Data parallel: from DDP to FSDP(ZeRO)
+- *Pesudo code* for DDP and FSDP 
+<div class='columns2'>
+
+<div>
+
+```
+# forward pass :
+for layer_i in layers: 
+  forward pass for layer_i
+# backward pass :
+for layer_i in layers:
+  backward pass for layer_i
+  full: all-reduce gradients for layer_i
+  full: update momentum & variance
+  full: update weights
+```
+
+</div>
+
+<div>
+
+```
+# forward pass :
+for layer_i in layers:
+  all-gather full weights for layer_i
+  forward pass for layer_i
+  discard full weights for layer_i
+# backward pass:
+for layer_i in layers:
+  all-gather full weights for layer_i
+  backward pass for layer_i
+  discard full weights for layer_i
+  part: reduce-scatter gradients for layer_i
+  part: update momentum & variance
+  part: update weights
+```
+
+</div>
+
+</div>
+
+- Advantages of ZeRO
+  - Parameter & gradient and optimizer states evenly shard to $N$ nodes
+  - Computation and communication overlaps
 
 <!-- _footer: '[ZeRO: Memory Optimizations Toward Training Trillion Parameter Models, Microsoft, 2019](https://arxiv.org/abs/1910.02054) <br> ' -->
 

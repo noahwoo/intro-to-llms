@@ -10,9 +10,9 @@ style: |
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1rem;
   }
-  .columns3 {
+  .columns2_left_one_third {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: 1fr 2fr;
     gap: 1rem;
   } 
   img[alt~="center"] {
@@ -207,15 +207,15 @@ Model training flops utilization(MFU):
 
 - Too big to fit in single GPU memory
   - 175B: $\sim (2+2+3 \times 4) \times 175=2800$GB for mixed-precision training
-    - Parameter & gradient(FP16): parameter, gradient
-    - Optimizer State(FP32): parameter, momentum, variance
+    - Parameter & gradient(FP16): parameter($W$), gradient($g$, $\frac{\partial L}{\partial W}$)
+    - Optimizer State(FP32): parameter, momentum($m$), variance($v$)
     - Activation(FP16): $2 \times (1 + 4 + 1) \times d \times B \times T \times L$
   - A100 Spec: 
     - GPU memory: 80GB
     - GPU memory bandwidth: 2039GB/s; NVLink: 600GB/s; PCIe 4.0: 64GB/s
     - TF32: 156TFlops
 - Speedup
-  - Scales linearly with # of cores? 
+  - Scales linearly with # of GPU cores?
 
 ---
 ### Basics on Forward & Backward and Parallel Ops
@@ -299,20 +299,76 @@ for layer_i in layers:
 ---
 ### Tensor parallel: Megatron-LM
 
+<div class='columns2_left_one_third'>
+
+<div>
+
+- $W_Q, W_K, W_V$ partition by head(col)
+- $W_O$ partition by row
+- $W_1$ partition by col, $W_2$ by row
+- Backward Allreduce for gradient
+
+</div>
+
+<div>
+<p align='right'>
+<img width='800px' src='img/img-canvas/mega-tron.png' />
+</p>
+</div>
+
+</div>
 <!-- _footer: '[Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism, Nvida, 2019](https://arxiv.org/abs/1909.08053)' -->
 
+--- 
+
+### Performance comparison of ZeRO and Megatron-LM
+- Experiment hardware: 
+  - Megatron-LM: 32 DGX-2H servers: 512 V100, 32GB GPUs
+  - ZeRO: 25 DGX-2 servers: 400 V100, 32GB GPUs
+  
+- TFlops Results:
+  - Megatron-LM: 15.1 PFlops 
+    - 76% scaling efficiency for single GPU 39TFlops(30% of peak Flops)
+  - ZeRO: 15 PFlops, with fewer GPU cores
+  
 ---
 ### Pipeline parallel: GPipe
 
+![bg right:60% fit](img/img-canvas/gpipe.png)
+
+- Layer-wise model partition
+- Re-materializaion: output activation stored and communicated
+- Pipeline reduce bubble ratio from $\frac{K-1}{K}$ to $\frac{K-1}{M+K-1}$
 <!-- _footer: '[GPipe: Efficient Training of Giant Neural Networks using Pipeline Parallelism, Google, 2018](https://arxiv.org/abs/1811.06965)' -->
 
 ---
-### Sequence parallel
-
-<!-- _footer: '[Sequence Parallelism: Long Sequence Training from System Perspective, HPC-AI, 2021](https://arxiv.org/abs/2105.13120)'-->
-
----
 ### Combined implementations: Megatron-DeepSpeed/ColossalAI
+
+<div class='columns2'>
+
+<div>
+
+Megatron-DeepSpeed
+- Data/Model parallel supported(3D)
+- ZeRO-Offload
+- Sparse attention
+- 1-bit Adam and 0/1 Adam
+- MoE specific parallelism
+- RLHF Demo: deepspeed-chat
+</div>
+
+<div>
+
+ColossalAI
+- Data/Model parallel supported(3D)
+- 3D Tensor parallelism
+- ZeRO-Offload: model data supported
+- MoE specific parallelism
+- RLHF Demo: ColossalChat
+
+</div>
+
+</div>
 
 <!-- _footer: '[Colossal-AI: A Unified Deep Learning System For Large-Scale Parallel Training, HPC-AI, 2021](https://arxiv.org/abs/2110.14883) <br> [Megatron-DeepSpeed](https://github.com/microsoft/Megatron-DeepSpeed)' -->
 

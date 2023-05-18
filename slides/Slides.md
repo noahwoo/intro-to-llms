@@ -10,11 +10,12 @@ style: |
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1rem;
   }
-  .columns2_left_one_third {
+  .columns2_left_1o3 {
     display: grid;
     grid-template-columns: 1fr 2fr;
     gap: 1rem;
   } 
+
   img[alt~="center"] {
     display: block;
     margin: 0 auto;
@@ -61,16 +62,17 @@ math: mathjax
 ## Overview from 30000 feet above
 - Paradigm transition in AI
   - From: **training**(specific) -> **prediction**(specific)
-  - To: **pretraining**(general) -> **finetuning**(general/specific) -> **in-context prompting**(specific)
+  - To: **pretraining**(general) -> **finetuning**(general/specific) -> **in-context prompt**(specific)
 - Primary steps of new paradigm
   - Pretraining with self-supervised learning
   - Finetuning on instruction from mutiple domains
-  - Application by steering the decoding process of LLM
+  - Application by steering/prompt the decoding process of LLM
 - Where are we to AGI?
   - From explanation to prediction
   - From correlation to causality
 ---
-## A LLMs tree
+## A LLMs Evolution Tree
+
 ![bg right:60% w:700px](img/llm-tree.png)
 
 - Decoder Only
@@ -128,6 +130,9 @@ math: mathjax
   - Positional encoding
   - Input or output LayerNorm
   - Activation
+
+![bg fit right:30%](img/img-canvas/attn-matrix.png)
+
 ---
 
 ## Parameter concentration
@@ -170,22 +175,24 @@ Model training flops utilization(MFU):
 
 ---
 ## Training objectives
+- Masked Language Models
 - Auto-regressive Language Models
-- Missing token prediction
+
+![bg fit right:40%](img/img-canvas/encoder-decoder.png)
 
 ---
 ## Text Corpus
 - Unsupervised text
-  - [BookCorpus](https://yknzhu.wixsite.com/mbweb): 7000 unpublished books
-  - [WebText](https://huggingface.co/datasets/openwebtext): 8M outlinks of Reddit.com
-  - [Common Crawl](https://commoncrawl.org/)
-- Week supervised text
-  - Summarization: [Reddit TL;DR](https://huggingface.co/datasets/reddit)
-  - QA: [StackExchange]()
-- Supervised text
-  - Summarization: 
-  - Q&A: 
-  - Dialog: InstructGPT
+  - [BookCorpus](https://yknzhu.wixsite.com/mbweb) : 11,000; [Gutenberg](https://www.gutenberg.org/) : 70,000 
+  - [OpenWebText](https://skylion007.github.io/OpenWebTextCorpus/): 8M outlinks of Reddit.com
+  - [Common Crawl](https://commoncrawl.org/); [C4](https://www.tensorflow.org/datasets/catalog/c4)
+  - Code: [BigQuery](https://cloud.google.com/bigquery?hl=zh-cn) [Github](https://huggingface.co/datasets/codeparrot/github-code)
+- Weak supervised text
+  - [Reddit TL;DR](https://webis.de/data/webis-tldr-17.html); [PushShift.io Reddit](https://arxiv.org/abs/2001.08435): Posts
+  - [StackExchange](https://archive.org/details/stackexchange) : Question & Answer w/ score
+- Supervised text: task related
+  - ~16 NLP tasks related datasets (Sentiment/QA/Reasoning, etc.)
+  - Human answer to prompt: InstructGPT
 
 ![bg right:30% fit](img/img-canvas/dataset.png)
 
@@ -194,13 +201,12 @@ Model training flops utilization(MFU):
 <!-- _color : white -->
 ## Parallel strategies
 - Why bother?
-- Four parallel paradigms
-  - Data parallel
+- Three parallel paradigms
+  - Data parallel: ZeRO
   - Model parallel
-    - Tensor parallel
-    - Pipeline parallel
-  - Sequence parallel 
-- Combined implementations
+    - Tensor parallel: Megatron-LM
+    - Pipeline parallel: GPipe
+- Combined implementations: DeepSpeed/ColossalAI
 ---
 
 ### Why bother?
@@ -299,7 +305,7 @@ for layer_i in layers:
 ---
 ### Tensor parallel: Megatron-LM
 
-<div class='columns2_left_one_third'>
+<div class='columns2_left_1o3'>
 
 <div>
 
@@ -311,9 +317,9 @@ for layer_i in layers:
 </div>
 
 <div>
-<p align='right'>
-<img width='800px' src='img/img-canvas/mega-tron.png' />
-</p>
+
+![fit](img/img-canvas/mega-tron.png)
+
 </div>
 
 </div>
@@ -334,11 +340,22 @@ for layer_i in layers:
 ---
 ### Pipeline parallel: GPipe
 
-![bg right:60% fit](img/img-canvas/gpipe.png)
+<div class='columns2_left_1o3'>
+
+<div>
 
 - Layer-wise model partition
 - Re-materializaion: output activation stored and communicated
 - Pipeline reduce bubble ratio from $\frac{K-1}{K}$ to $\frac{K-1}{M+K-1}$
+
+</div>
+
+<div>
+
+![fit](img/img-canvas/gpipe.png)
+
+</div>
+
 <!-- _footer: '[GPipe: Efficient Training of Giant Neural Networks using Pipeline Parallelism, Google, 2018](https://arxiv.org/abs/1811.06965)' -->
 
 ---
@@ -377,7 +394,11 @@ ColossalAI
 <!-- _color : white --> 
 ## <!-- fixing --> End of Parallel strategies
 ---
+
 ## Result & Evaluations
+
+<!-- _footer: '[Holistic Evaluation of Language Models, 2022, Stanford](https://arxiv.org/abs/2211.09110)' -->
+
 ---
 <!-- _backgroundColor : black -->
 <!-- _color : white -->
@@ -407,7 +428,7 @@ Key to success
 - Model scale: 137B LaMDA-PT
 - Natural language instructions
 
-![bg fit right:50%](img/instruct-finetuning.png)
+![bg fit right:40%](img/instruct-finetuning.png)
 
 <!-- _footer: '[Finetuned Language Models Are Zero-Shot Learners, 2021, Google](https://arxiv.org/abs/2109.01652)<br> [Scaling Instruction-Finetuned Language Models, 2022, Google](https://arxiv.org/abs/2210.11416)' -->
 ---
@@ -489,9 +510,27 @@ What we want from finetuning:
 
 ## Methods and performance on Summerization task
 
-| ![width:400px](img/peft-allinone.png) | ![width:400px](img/peft-summerization.png) |
-| -- | -- |
-| <td colspan='2'> PEFT illustration and performance comparison (Source: [Junxian He, et.al](https://arxiv.org/abs/2110.04366)) |
+<div class='columns2'>
+
+<div>
+
+![width:400px](img/peft-allinone.png)
+
+</div>
+
+<div>
+
+![width:400px](img/peft-summerization.png)
+
+</div>
+
+</div>
+
+<p style='text-align:center'>
+
+PEFT illustration and performance comparison (Source: [Junxian He, et.al](https://arxiv.org/abs/2110.04366))
+
+</p>
 
 ---
 
@@ -532,8 +571,6 @@ What we want from finetuning:
 - Parameter scale: 
   - Vanilla: $|P| \times d \times 2 \times L$
   - Reparameteration: $|P| \times d + d \times H + H \times d \times 2 \times L$ 
-
-![bg right:30% fit](img/img-canvas/dataset.png)
 
 <!-- _footer: '[PrefixTuning: Optimizing Continuous Prompts for Generation, Stanford, 2021](https://arxiv.org/abs/2101.00190)' -->
 
@@ -586,33 +623,46 @@ What we want from finetuning:
 ## Steering the decoding process of LLM
 - Decoding strategies
 - Prompt enginneering
+
 ---
 ## Decoding strategies
-- Temperature in decoding: $p_i = \frac{\exp(o_i/T)}{\sum_j \exp(o_j/T)}$
-- Maximization search
-  - Greedy search
-  - Beam search
+- Temperature in decoding: $p(w_i|w_{<i}) = \frac{\exp(o_i/T)}{\sum_j \exp(o_j/T)}$, $o_i$ logits from LLM
+- Maximal Likelihood Search
+  - Greedy search: $w_i = \arg \max p(w_i | w_{<i})$, eq. to $T=0$
+  - Beam search: $w_i \in \text{TopN }p(w_i|w_{i-1}, w_{<i-1}) p(w_{i-1} | w_{<i-1})$
 - Sampling
-  - top-K sampling
-  - top-p(Nucleus) sampling
+  - top-K sampling: $w_i = \text{sample TopK } p(w_i|w_{<i})$
+  - top-p(Nucleus) sampling: $w_i = \text{sample TopK}_i\text{ } \sum_{w_i < K_i} p(w_i|w_{<i}) \ge p$
   - Repetition penalized sampling
 - Guided decoding
   - $score(x_{t+1}, b_{t}) = score(b_{t}) + \log p(x_{t+1}) + \sum_i \alpha_i f_i(x_{t+1})$
 ---
 
-## Prompting engineering
-- Instruction/Zero-shot prompting
-- Few-shot Prompting
-- In-context Learning(Prompting)
-- Chain-of-Thought
+## Prompt engineering
+- Single round interactive
+  - Instruction/Zero-shot Prompt
+  - Few-shot Promp
+  - In-context Learning(Prompt)
+  - Chain-of-Thought
+- Multi rounds interactive
+  - MRKL: ```[Thought/Action/Action Input/Observation]+```, no demo, access tools
+  - Self-ask: ```Followup question? [Question/Answer]+ Final Answer```, demo
+  - ReACT: ```[Thought/Action/Observation]+```, demo, access tools
 
 ---
 
 ## More on In-context Learning
+
+What matters?
+- Examples template(instruct/CoT) & order: yes
+- Label space & Input distribution(diversity): yes
+- Exact ```{Question, Answer}``` pair: no/yes
+
 Why it works? 
-- Interpretation from Topic Model
-- Induction head
-- View from gradient descent
+- Interpretation from Topic Model: $P(o|p) = \int_z P(o|z,p) P(z|p) dz$
+- Induction head: ```[a][b] ... [a] -> [b] ```
+
+<!-- _footer: '[A Mathematical Framework for Transformer Circuits, 2021, Anthropic](https://transformer-circuits.pub/2021/framework/index.html) <br> [How does in-context learning work?, 2022, Stanford](https://ai.stanford.edu/blog/understanding-incontext/) <br> [Rethinking the Role of Demonstrations: What Makes In-Context Learning Work?, 2022, Meta](https://arxiv.org/abs/2202.12837) <br> [Larger language models do in-context learning differently, 2023, Google](https://arxiv.org/abs/2303.03846)' -->
 
 ---
 

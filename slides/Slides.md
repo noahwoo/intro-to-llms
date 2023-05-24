@@ -10,9 +10,16 @@ style: |
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1rem;
   }
+
   .columns2_left_1o3 {
     display: grid;
     grid-template-columns: 1fr 2fr;
+    gap: 1rem;
+  } 
+
+  .columns2_left_2o3 {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
     gap: 1rem;
   } 
 
@@ -70,8 +77,11 @@ math: mathjax
 - Where are we to AGI?
   - From explanation to prediction
   - From correlation to causality
+
+<!-- _footer: '[AI and the future of humanity, 2023, Yuval Noah Harari](https://www.youtube.com/watch?v=LWiM-LuRe6w)' -->
+
 ---
-## A LLMs Evolution Tree
+### A LLMs Evolution Tree
 
 ![bg right:60% w:700px](img/llm-tree.png)
 
@@ -90,7 +100,7 @@ math: mathjax
 - Computation concentration
 
 ---
-## Transformer modules
+### Transformer modules
 <div class='columns2'>
 <div>
 
@@ -117,7 +127,7 @@ math: mathjax
 
 <!-- _footer: '[nanoGPT](https://github.com/karpathy/nanoGPT)' -->
 ---
-## Aspects of alternative
+### Aspects of alternative
 - Efficient Transformer (for long sequence)
   - Coarse sequence resolution: 
     - Block/Stride/Clustering/Neural Memory
@@ -135,7 +145,7 @@ math: mathjax
 
 ---
 
-## Parameter concentration
+### Parameter concentration
 **Decoder only** Transformer(GPT)
 - Parameter size: 
    - Embedding: $(V + T) \times d$
@@ -151,7 +161,7 @@ math: mathjax
 <!-- ![w:500px](img/gpt3-parameter-scale.jpeg) -->
  
 ---
-## Computation concentration 
+### Computation concentration 
 **Decoder only** Transformer
 Per-token calculation:
 - QKV+project: $2 \times L \times (3 \times H \times h_d \times d + (H \times h_d) \times d) = 2 \times 4Ld^2$
@@ -162,6 +172,8 @@ Model training flops utilization(MFU):
 - Forward and backward: $(1+2) \times (2N + 2LTd) \approx 6N$, where $N \approx 12Ld^2$
 - Theoretical peak throughput: $\frac{P}{6N+6LTd}$
 - $\text{MFU}=\frac{\text{Observed throughput}}{\text{Theoretical peak throughtput}}$
+
+<!-- _footer: '[PaLM: Scaling Language Modeling with Pathways, 2022, Google](https://arxiv.org/abs/2204.02311) <br> [Chinchilla: Training Compute-Optimal Large Language Models, 2022, Google](https://arxiv.org/abs/2203.15556)'-->
 
 ---
 <!-- _backgroundColor : black -->
@@ -174,14 +186,23 @@ Model training flops utilization(MFU):
 - Results & Evaluation
 
 ---
-## Training objectives
-- Masked Language Models
-- Auto-regressive Language Models
+### Training architecture & objectives
+
+- Architecture
+  - Encoder: BERT series
+  - Encoder-Decoder: T5(11B)
+  - (Causal-)Decoder: GPTs/Ernie3.0 Titan
+  - Prefix-Decoder: GLM
+- Objectives
+  - Masked LM: BERT/GLM/T5
+  - Auto-regressive LM: T5/GPTs/Ernie3.0 Titan
+  - Multi-task pretraining: GLM/Ernie3.0 Titan
 
 ![bg fit right:40%](img/img-canvas/encoder-decoder.png)
 
 ---
-## Text Corpus
+
+### Text Corpus
 - Unsupervised text
   - [BookCorpus](https://yknzhu.wixsite.com/mbweb) : 11,000; [Gutenberg](https://www.gutenberg.org/) : 70,000 
   - [OpenWebText](https://skylion007.github.io/OpenWebTextCorpus/): 8M outlinks of Reddit.com
@@ -195,6 +216,35 @@ Model training flops utilization(MFU):
   - Human answer to prompt: InstructGPT
 
 ![bg right:30% fit](img/img-canvas/dataset.png)
+
+---
+### Baidu Ernie 3.0 Titan: 260B
+
+<div class='columns2_left_2o3'>
+
+<div>
+
+- 2 Types of transformer modules
+  - Universal module
+  - Task specific module
+- 3 Levels of pretraining tasks
+  - Word aware: Knowledge integrated LM
+  - Structure aware: sentence reordering task
+  - Knowledge aware: controllable LM task
+- 4D hybrid parallelism for training
+  - Shared data parallel with ZeRO(2D)
+  - Intra-layer tensor parallel(D)
+  - Inter-layer pipeline parallel(D)
+
+</div>
+
+<div>
+
+![width:400px](img/ernie-3.0.png)
+
+</div>
+
+</div>
 
 ---
 <!-- _backgroundColor : gray -->
@@ -397,6 +447,11 @@ ColossalAI
 
 ## Result & Evaluations
 
+- NLU
+  - SuperCLUE
+- NLG
+- NLI
+
 <!-- _footer: '[Holistic Evaluation of Language Models, 2022, Stanford](https://arxiv.org/abs/2211.09110)' -->
 
 ---
@@ -410,7 +465,7 @@ ColossalAI
 
 ---
 
-## Target and issues
+### Target and issues
 - Target
   - From pattern completion to real world tasks
 - Issues
@@ -420,7 +475,7 @@ ColossalAI
   - Securities
 
 ---
-## Instruct Finetuning
+### Instruct Finetuning
 
 Key to success
 - Number of finetuning datasets: 
@@ -433,7 +488,7 @@ Key to success
 <!-- _footer: '[Finetuned Language Models Are Zero-Shot Learners, 2021, Google](https://arxiv.org/abs/2109.01652)<br> [Scaling Instruction-Finetuned Language Models, 2022, Google](https://arxiv.org/abs/2210.11416)' -->
 ---
 
-## Finetuning for specific task
+### Finetuning for specific task
 
 <style>
 img[alt~="center"] {
@@ -472,11 +527,11 @@ What we want from finetuning:
   - Open problem: go beyond things that labelers can easily do
     - Verification is easier than generation
 
-<!-- _footer: '[Anthropic: 2207.05221](https://arxiv.org/abs/2207.05221) <br> [Talk of John Schulman @ EECS Berkeley, 2023/4/24](https://news.berkeley.edu/2023/04/24/berkeley-talks-transcript-chatgpt-developer-john-schulman/)'-->
+<!-- _footer: '[Language Models (Mostly) Know What They Know, 2022, Anthropic](https://arxiv.org/abs/2207.05221) <br> [Talk of John Schulman @ EECS Berkeley, 2023/4/24](https://news.berkeley.edu/2023/04/24/berkeley-talks-transcript-chatgpt-developer-john-schulman/)'-->
 
 ---
 
-## More on Reinforcement Learning
+### More on Reinforcement Learning
 
 - Catalog of algorithms(**PPO belongs**)
   - World model or **model free**
@@ -508,7 +563,7 @@ What we want from finetuning:
 
 ---
 
-## Methods and performance on Summerization task
+### Methods and performance on Summerization task
 
 <div class='columns2'>
 
@@ -534,7 +589,7 @@ PEFT illustration and performance comparison (Source: [Junxian He, et.al](https:
 
 ---
 
-## Design aspects
+### Design aspects
 - **Finetuned Modules**:
   - Attention-key/value matrix: LoRA(Q/V)
   - Attention-head: Prefix-Tuning(K/V)
@@ -545,7 +600,7 @@ PEFT illustration and performance comparison (Source: [Junxian He, et.al](https:
   - Task related head
 
 ---
-## Adapter
+### Adapter
 
 - Implementation & training notes
   - $h \leftarrow h + f(h W_{\text{down}})W_{\text{up}}$
@@ -561,7 +616,7 @@ PEFT illustration and performance comparison (Source: [Junxian He, et.al](https:
 <!-- _footer: '[Adapter: Parameter-Efficient Transfer Learning for NLP, Google, 2019](https://arxiv.org/abs/1902.00751)'-->
 
 ---
-## Prefix-Tuning
+### Prefix-Tuning
 
 - Implementation
   - $\text{head} = \text{Attn}(X W_Q, [P_K; XW_K], [P_V; XW_V])$
@@ -575,7 +630,7 @@ PEFT illustration and performance comparison (Source: [Junxian He, et.al](https:
 <!-- _footer: '[PrefixTuning: Optimizing Continuous Prompts for Generation, Stanford, 2021](https://arxiv.org/abs/2101.00190)' -->
 
 ---
-## More on Prefix-Tuning: Training and scaling
+### More on Prefix-Tuning: Training and scaling
 - Training
   - Initialization: 
     - Real/high frequency words activation
@@ -589,7 +644,7 @@ PEFT illustration and performance comparison (Source: [Junxian He, et.al](https:
 <!-- _footer: '[PrefixTuning: Optimizing Continuous Prompts for Generation, Stanford, 2021](https://arxiv.org/abs/2101.00190) <br> [PromptTuning: The Power of Scale for Parameter-Efficient Prompt Tuning, Google, 2021](https://arxiv.org/abs/2104.08691) <br> [P-Tuning v2: Prompt Tuning Can Be Comparable to Fine-tuning Universally Across Scales and Tasks, Tsinghua, 2021](https://arxiv.org/abs/2110.07602)' -->
 
 ---
-## LoRA
+### LoRA
 - Implementation & training notes
   - Transformer: $W = W_0 + (BA)^T, A \in R^{r \times d}, B \in R^{d_h \times r}, r \ll \min \{d_h, d\}$
   - $W_Q$ and $W_V$ considered, parameter scale: $2 \times 2 \times d \times r \times L$
@@ -605,7 +660,7 @@ PEFT illustration and performance comparison (Source: [Junxian He, et.al](https:
 
 ---
 
-## More on LoRA: which part to update & rank settings 
+### More on LoRA: which part to update & rank settings 
 
 ![width:800px](img/lora-which-part-to-update.png)
 ![width:800px](img/lora-how-to-set-r.png)
@@ -625,7 +680,7 @@ PEFT illustration and performance comparison (Source: [Junxian He, et.al](https:
 - Prompt enginneering
 
 ---
-## Decoding strategies
+### Decoding strategies
 - Temperature in decoding: $p(w_i|w_{<i}) = \frac{\exp(o_i/T)}{\sum_j \exp(o_j/T)}$, $o_i$ logits from LLM
 - Maximal Likelihood Search
   - Greedy search: $w_i = \arg \max p(w_i | w_{<i})$, eq. to $T=0$
@@ -638,20 +693,20 @@ PEFT illustration and performance comparison (Source: [Junxian He, et.al](https:
   - $score(x_{t+1}, b_{t}) = score(b_{t}) + \log p(x_{t+1}) + \sum_i \alpha_i f_i(x_{t+1})$
 ---
 
-## Prompt engineering
-- Single round interactive
+### Prompt engineering
+- One-shot interaction
   - Instruction/Zero-shot Prompt
   - Few-shot Promp
   - In-context Learning(Prompt)
   - Chain-of-Thought
-- Multi rounds interactive
-  - MRKL: ```[Thought/Action/Action Input/Observation]+```, no demo, access tools
-  - Self-ask: ```Followup question? [Question/Answer]+ Final Answer```, demo
-  - ReACT: ```[Thought/Action/Observation]+```, demo, access tools
+- Recursive interaction
+  - MRKL: ```[Thought/Action/Action Input/Observation]+```, zero-shot, access tools
+  - Self-ask: ```Followup question? [Question/Answer]+ Final Answer```, few-shot
+  - ReACT: ```[Thought/Action/Observation]+```, few-shot, access tools
 
 ---
 
-## More on In-context Learning
+### More on In-context Learning
 
 What matters?
 - Examples template(instruct/CoT) & order: yes
@@ -679,22 +734,170 @@ Why it works?
 <!-- _color : white -->
 ## Augmented Language Models
 - Problems in vanilla LLMs
-- Two augment aspects
-   - Retrieval augmented language models
-   - Tool augmented language models
+- Augment aspects
+   - Reasoning/Planning
+   - Tool usage
 
 ---
-## Problems in vailla LLMs
+
+## Problems in vanilla LLMs
+
+- Compression of world knowledge
+- Context limitation
+- No up-to-date knowledge
+- Hallucinations
+
 ---
-## Retrieval augmented language models
+
+## Augmented Language Model Overview
+
+![width:600px center](img/img-canvas/human-agent-tool.png)
+
+<div class='columns2'>
+
+<div>
+
+- 2 Steps
+  - What: Planning/Reasoning
+  - How: Tool usage
+
+</div>
+
+<div>
+
+- 3 Teaching Methods 
+  - In-context prompt: 
+    - One-shot/Recursive
+  - Finetuning
+  - Reinforcement Learning: 
+    - Hardcode/Human Feedback
+
+</div>
+
+</div>
+
+<!-- _footer: '[Augmented Language Models: a Survey, 2023, Meta](https://arxiv.org/abs/2302.07842) <br> [Tool Learning with Foundation Models, 2023, Tsinghua](https://arxiv.org/abs/2304.08354)'-->
+
 ---
-## Tool augmented language models
+
+## Planning by self-talk: Self-ask
+
+<div class='columns2_left_2o3'>
+
+<div>
+
+- Multi-hop question and compositionality gap
+- Self-ask prompt:
+  - Few-shot prompt scaffold: 
+     ```
+     Question: {{Question}}
+     Are follow up questions needed here: Yes
+     Follow up: {{Follow-up-question}}
+     Intermediate answer: {{Itermediate-answer}}
+     So the final answer is: {{Final-answer}}
+
+     Question: {{Question}}
+     Are follow up questions needed here: {{LLM-gen}}
+     ```
+  - Few-shot prompt with search engine: 
+    - The same prompt as before
+    - Generated by query search engine:
+     ```
+     Intermediate answer: {{Itermediate-answer}}
+     ```
+
+</div>
+
+<div>
+
+Accuracy on *Compositional Celebrities* 2-hop questions
+
+![width:300px](img/self-ask-comp-gap.png)
+![width:300px](img/self-ask-comp-gap-fixed.png)
+
+</div>
+
+</div>
+
+<!-- _footer: '[Self-ask: Measuring and narrowing the compositionality gap in language models, 2022, MetaAI](https://arxiv.org/abs/2210.03350)' -->
+
+--- 
+
+## Planning by self-talk: Self-ask prompt 
+
+<font size="5">
+
+>  **Question:** Who lived longer, Theodor Haecker or Harry Vaughan Watkins? 
+>  **Are follow up questions needed here: Yes.**
+>  **Follow up:** How old was Theodor Haecker when he died?
+>  **Intermediate answer:** Theodor Haecker was 65 years old when he died.
+>  **Follow up:** How old was Harry Vaughan Watkins when he died?
+>  **Intermediate answer:** Harry Vaughan Watkins was 69 years old when he died.
+>  **So the final answer is:** Harry Vaughan Watkins
+
+>  **Question:** Who was president of the U.S. when superconductivity was discovered?
+>  **Are follow up questions needed here:** <span style="background-color:#90EE90">**Yes.**
+>  **Follow up:** When was superconductivity discovered?
+>  **Intermediate answer:** Superconductivity was discovered in 1911.
+>  **Follow up:** Who was president of the U.S. in 1911?
+>  **Intermediate answer:** William Howard Taft.
+>  **So the final answer is:** William Howard Taft.</span>
+
+</font>
+
+---
+
+## Planning by self-talk: Self-ask prompt with search engine
+
+<font size="5">
+
+>  **Question:** Who lived longer, Theodor Haecker or Harry Vaughan Watkins? 
+>  **Are follow up questions needed here: Yes.**
+>  **Follow up:** How old was Theodor Haecker when he died?
+>  **Intermediate answer:** Theodor Haecker was 65 years old when he died.
+>  **Follow up:** How old was Harry Vaughan Watkins when he died?
+>  **Intermediate answer:** Harry Vaughan Watkins was 69 years old when he died.
+>  **So the final answer is:** Harry Vaughan Watkins
+
+>  **Question:** Who was president of the U.S. when superconductivity was discovered?
+>  **Are follow up questions needed here:** <span style="background-color:#90EE90">**Yes.**
+>  **Follow up:** When was superconductivity discovered?</span>
+>  <span style="background-color:#FFCCCB">**Intermediate answer:** Superconductivity was discovered in 1911.</span>
+>  <span style="background-color:#90EE90">**Follow up:** Who was president of the U.S. in 1911?</span>
+>  <span style="background-color:#FFCCCB">**Intermediate answer:** William Howard Taft.</span>
+>  <span style="background-color:#90EE90">**So the final answer is:** William Howard Taft.</span>
+
+</font>
+
+---
+
+## Conditional LM on retrieved documents: REALM
+
+<!-- _footer: '[REALM: Retrieval-Augmented Language Model Pre-Training, 2020, Google](https://arxiv.org/abs/2002.08909)' -->
+
+---
+
+## Bootstrapping with self-supervision for reasoning: StAR
+
+<!-- _footer: '[STaR: Bootstrapping reasoning with reasoning, 2022, Google](https://arxiv.org/abs/2203.14465)' -->
+
+---
+
+## Learning to code: Codex
+
+<!-- _footer: '[Evaluating large language models trained on code, 2021, OpenAI](https://arxiv.org/abs/2107.03374)'-->
+
+---
+
+## Teach LM to use search engine: WebGPT
+
+<!-- _footer: '[WebGPT: Browser-assisted question-answering with human feedback, 2021, OpenAI](https://arxiv.org/abs/2112.09332)' -->
+
 ---
 <!-- _backgroundColor : gray -->
 <!-- _color : white -->
 ## End of Augmented Language Models
----
-## Automatic prompting
+
 ---
 <!-- _backgroundColor : gray -->
 <!-- _color : white -->

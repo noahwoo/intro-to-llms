@@ -725,8 +725,7 @@ Why it works?
 <!-- _color : white -->
 ## Augmentation and Plugins
 - Augmented Language Models
-- Automatic prompting
-- Plugins
+- Plugins Ecosystem
 
 ---
 
@@ -768,7 +767,7 @@ Why it works?
 - 3 Teaching Methods 
   - In-context prompt: 
     - One-shot/Recursive
-  - Finetuning
+  - Pretraining/Finetuning
   - Reinforcement Learning: 
     - Hardcode/Human Feedback
 
@@ -871,9 +870,120 @@ Accuracy on *Compositional Celebrities* 2-hop questions
 
 ---
 
-## Conditional LM on retrieved documents: REALM
+## Augment LM with retrieval end-to-end: REALM
+
+- Two steps of *retrieve* and *predict*
+  - $P(y|x) = \sum_z P(y|z,x) P(z|x)$
+  - *Neural retrieval*: $P(z|x) = \text{Softmax}_z (\text{BERT}_{\text{CLS}}(x)^T \text{BERT}_{\text{CLS}}(z))$
+  - *Knowledge-augmented encoder*: $P(y|z,x)$
+    - Pretraining: MLM loss of BERT
+    - Finetuning: Reading Comprehension loss of BERT(assume $y \in z$)
+- Practical training
+  - Involve top-K documents of $P(z|x)$
+  - Vector search of top-K with asynchronous index update
 
 <!-- _footer: '[REALM: Retrieval-Augmented Language Model Pre-Training, 2020, Google](https://arxiv.org/abs/2002.08909)' -->
+
+---
+
+## Augment LM with retrieval end-to-end: REALM (Demo/Ablation)
+
+
+
+<div class='columns2'>
+
+<div>
+
+![width:400px](./img/realm-pt.png)
+![width:400px](./img/realm-ft.png)
+
+</div>
+
+<div>
+
+![fit](./img/realm-ablation.png)
+
+- joint training of retrieval/encoder helps
+- index update required
+
+</div>
+
+</div>
+
+---
+
+## Teach LM to use search and browse web: WebGPT
+
+- Long format question-answering problem(LFQA)
+- Leverage on-the-shelf knowledge retrieval & answer synthesis system
+  - Bing Search API
+  - GPT-3 175B
+- Focus on finetuning to align with human feedback
+  - **Behavior Cloning(BC)**: Supervised finetune with human *demonstrations*
+  - **Reward Modeling(RM)**: Train with *comparison* feedback based on BC model
+  - **Reinforcement Learning**: Finetune BC model with RM reward and BC KL penalty
+  - Generation with **rejection sampling**: BC/RL on RM
+<!-- _footer: '[WebGPT: Browser-assisted question-answering with human feedback, 2021, OpenAI](https://arxiv.org/abs/2112.09332)' -->
+
+---
+
+## Teach LM to use search and browse web: Human Feedback Tool
+
+![fit](img/webgpt-demo-quote.png)
+<!-- ![width:600px](img/webgpt-demo-answer.png) -->
+
+<!-- _footer: '[WebGPT: instructions for contractors](https://docs.google.com/document/d/1dqfhj1W8P0JhwMKD5lWbhppY9JDFfm7tCwZudolmpzg/edit)' -->
+
+---
+
+## Teach LM to use search and browse web: Action Space & Prompt
+
+<div class='columns2'>
+
+<div>
+
+- **Action Space**
+  - Search {query}
+  - Clicked on link {link ID}
+  - Find in page: {text}
+  - Quote: {text}
+  - Scrolled down/up {1,2,3}
+  - Top/Back 
+  - End: Answer
+  - End: {Nonsense, Controversial}
+
+</div>
+
+<div>
+
+- **Prompt**
+![fit](img/webgpt-prompt.png)
+
+</div>
+
+</div>
+
+---
+
+## Teach LM to use search and browse web: Main Conclusion
+
+<div class='columns2'>
+
+<div>
+
+![width:550px](img/webgpt-comparison.png)
+
+- Outperform human & reference answer
+- RL shadowed by BC-best-of-n
+
+</div>
+
+<div>
+
+![width:550px](img/webgpt-bbc2human2reddit.png)
+![width:550px](img/webgpt-result-rl2bc2bbc.png)
+
+</div>
 
 ---
 
@@ -889,11 +999,6 @@ Accuracy on *Compositional Celebrities* 2-hop questions
 
 ---
 
-## Teach LM to use search engine: WebGPT
-
-<!-- _footer: '[WebGPT: Browser-assisted question-answering with human feedback, 2021, OpenAI](https://arxiv.org/abs/2112.09332)' -->
-
----
 <!-- _backgroundColor : gray -->
 <!-- _color : white -->
 ## End of Augmented Language Models
@@ -926,6 +1031,22 @@ Accuracy on *Compositional Celebrities* 2-hop questions
 <!-- _backgroundColor : gray -->
 <!-- _color : white -->
 ## End of Plugins
+
+--- 
+
+## Important but not covered
+
+- Practical prompt enginneering
+- Text to image: 
+  - Latent Diffusion Model/CLIP
+  - DALL-E
+  - Stable Diffusion
+- Multi-modal and embodient
+  - PaLM-E
+  - Gato
+- Quantization & efficient inference on edge device
+  - [ggml by Georgi Gerganov](https://github.com/ggerganov/ggml)
+- And more...
 
 ---
 

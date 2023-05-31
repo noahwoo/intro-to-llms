@@ -447,12 +447,12 @@ ColossalAI
 
 ## Result & Evaluations
 
-- NLU
-  - SuperCLUE
-- NLG
-- NLI
+- CLUE/SuperCLUE
+- MMLU
+- MATH
+- C-Eval
 
-<!-- _footer: '[Holistic Evaluation of Language Models, 2022, Stanford](https://arxiv.org/abs/2211.09110)' -->
+<!-- _footer: '[Holistic Evaluation of Language Models, 2022, Stanford](https://arxiv.org/abs/2211.09110) [C-Eval: A Multi-Level Multi-Discipline Chinese Evaluation Suite for Foundation Models, 2023, SJTU](https://arxiv.org/abs/2305.08322)' -->
 
 ---
 <!-- _backgroundColor : black -->
@@ -503,7 +503,7 @@ img[alt~="center"] {
 
 --- 
 
-### Problems from Supervised Finetuning(SFT)
+### Problems with Supervised Finetuning(SFT)
 - Learning only the task format and the way to response for the format
 - Knowledge labeled but not in the LLM leads to more hallucination
 - Knowledge in the LLM but labeled as `don't know` leads to withhold information
@@ -701,8 +701,8 @@ PEFT illustration and performance comparison (Source: [Junxian He, et.al](https:
   - Chain-of-Thought
 - Recursive interaction
   - MRKL: ```[Thought/Action/Action Input/Observation]+```, zero-shot, access tools
-  - Self-ask: ```Followup question? [Question/Answer]+ Final Answer```, few-shot
-  - ReACT: ```[Thought/Action/Observation]+```, few-shot, access tools
+  - **Self-ask**: ```Followup question? [Question/Answer]+ Final Answer```, few-shot
+  - **ReACT**: ```[Thought/Action/Observation]+```, few-shot, access tools
 
 ---
 
@@ -870,6 +870,11 @@ Accuracy on *Compositional Celebrities* 2-hop questions
 
 ---
 
+## Combine reasoning and actions with LLM: ReAct
+
+
+---
+
 ## Augment LM with retrieval end-to-end: REALM
 
 - Two steps of *retrieve* and *predict*
@@ -987,18 +992,6 @@ Accuracy on *Compositional Celebrities* 2-hop questions
 
 ---
 
-## Bootstrapping with self-supervision for reasoning: StAR
-
-<!-- _footer: '[STaR: Bootstrapping reasoning with reasoning, 2022, Google](https://arxiv.org/abs/2203.14465)' -->
-
----
-
-## Learning to code: Codex
-
-<!-- _footer: '[Evaluating large language models trained on code, 2021, OpenAI](https://arxiv.org/abs/2107.03374)'-->
-
----
-
 <!-- _backgroundColor : gray -->
 <!-- _color : white -->
 ## End of Augmented Language Models
@@ -1015,16 +1008,52 @@ Accuracy on *Compositional Celebrities* 2-hop questions
   - Other paradigm proposal
 ---
 ## Plugins ecosystem
+
 - Tool as a service
 - From SEO to LMO
 - Orchestration by LLM
 
 ---
+
+## Paradigm of Task-driven Autonomous Agent
+
+<div class='columns2_left_1o3'>
+
+<div>
+
+- BabyAGI
+- AutoGPT
+- Langchain Agent/Tool
+- Fixie
+
+</div>
+
+<div>
+
+![width:800px](img/task-driven-auto-agent.png)
+
+</div>
+
+</div>
+
+<!-- _footer: '[Task-driven Autonomous Agent Utilizing GPT-4, Pinecone, and LangChain for Diverse Applications, 2023](https://yoheinakajima.com/task-driven-autonomous-agent-utilizing-gpt-4-pinecone-and-langchain-for-diverse-applications/)' -->
+
+---
+
+## BabyAGI/AutoGPT
+
+---
+
 ## Langchain Agent/Tool
+
 ---
+
 ## ChatGPT Plugins
+
 ---
+
 ## Fixie
+
 ---
 ## Other paradigm proposal
 ---
@@ -1033,6 +1062,15 @@ Accuracy on *Compositional Celebrities* 2-hop questions
 ## End of Plugins
 
 --- 
+
+## Opensource world
+
+- Alpaca
+- Vicuna
+- RWKV
+- Guana
+
+---
 
 ## Important but not covered
 
@@ -1046,6 +1084,7 @@ Accuracy on *Compositional Celebrities* 2-hop questions
   - Gato
 - Quantization & efficient inference on edge device
   - [ggml by Georgi Gerganov](https://github.com/ggerganov/ggml)
+  - [bitsandbytes: LLM.int8()](https://github.com/TimDettmers/bitsandbytes)/[QLoRA](https://github.com/artidoro/qlora)
 - And more...
 
 ---

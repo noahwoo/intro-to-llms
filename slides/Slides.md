@@ -447,12 +447,28 @@ ColossalAI
 
 ## Result & Evaluations
 
+<div class='columns2'>
+
+<div>
+
 - CLUE/SuperCLUE
 - MMLU
 - MATH
 - C-Eval
 
-<!-- _footer: '[Holistic Evaluation of Language Models, 2022, Stanford](https://arxiv.org/abs/2211.09110) [C-Eval: A Multi-Level Multi-Discipline Chinese Evaluation Suite for Foundation Models, 2023, SJTU](https://arxiv.org/abs/2305.08322)' -->
+</div>
+
+<div>
+
+C-Eval Accuracy: <span style="color:#D3D3D3">YY: 47+ </span>
+
+![width:300px](img/ceval-validation-result.png)
+
+</div>
+
+</div>
+
+<!-- _footer: '[Holistic Evaluation of Language Models, 2022, Stanford](https://arxiv.org/abs/2211.09110) <br> [C-Eval: A Multi-Level Multi-Discipline Chinese Evaluation Suite for Foundation Models, 2023, SJTU](https://arxiv.org/abs/2305.08322)' -->
 
 ---
 <!-- _backgroundColor : black -->
@@ -475,7 +491,12 @@ ColossalAI
   - Securities
 
 ---
+
 ### Instruct Finetuning
+
+<div class='columns2'>
+
+<div>
 
 Key to success
 - Number of finetuning datasets: 
@@ -483,9 +504,17 @@ Key to success
 - Model scale: 137B LaMDA-PT
 - Natural language instructions
 
-![bg fit right:40%](img/instruct-finetuning.png)
+</div>
 
+<div>
+
+![width:600px](img/instruct-finetuning.png)
+
+</div>
+
+</div>
 <!-- _footer: '[Finetuned Language Models Are Zero-Shot Learners, 2021, Google](https://arxiv.org/abs/2109.01652)<br> [Scaling Instruction-Finetuned Language Models, 2022, Google](https://arxiv.org/abs/2210.11416)' -->
+
 ---
 
 ### Finetuning for specific task
@@ -732,23 +761,44 @@ Why it works?
 <!-- _backgroundColor : gray -->
 <!-- _color : white -->
 ## Augmented Language Models
-- Problems in vanilla LLMs
-- Augment aspects
+- Pros and Cons in vanilla LLMs
+- Augmentation
    - Reasoning/Planning
    - Tool usage
 
 ---
 
-## Problems in vanilla LLMs
+## Pros and Cons in vanilla LLMs
 
+<div class='columns2'>
+
+<div>
+
+Pros
+- World knowledge
+- Instruction Following
+- Few/Zero-shot Learning
+- In-context Learning
+- Chain-of-Thought
+- Arithmetic/Commonsense Reasoning
+
+</div>
+
+<div>
+
+Cons
 - Compression of world knowledge
-- Context limitation
 - No up-to-date knowledge
+- Context limitation
 - Hallucinations
+
+</div>
+
+</div>
 
 ---
 
-## Augmented Language Model Overview
+## Augmented Language Model Brief Overview
 
 ![width:600px center](img/img-canvas/human-agent-tool.png)
 
@@ -756,7 +806,7 @@ Why it works?
 
 <div>
 
-- 2 steps in augmenting
+- 2-step loops in augmenting
   - What: Planning/Reasoning
   - How: Tool usage
 
@@ -768,8 +818,9 @@ Why it works?
   - In-context prompt: 
     - One-shot/Recursive
   - Pretraining/Finetuning
+    - Human/Self-teach
   - Reinforcement Learning: 
-    - Hardcode/Human Feedback
+    - Hardcode/Human-Feedback
 
 </div>
 
@@ -1086,6 +1137,93 @@ is 1,800 to 7,000 ft.
 
 ---
 
+## LLM self-teach to use tools: Toolformer
+
+<div class='columns2'>
+
+<div>
+
+**Corpus annotation**
+- Prompt LM(tool-wise) and sampling $m$ tools for top-$K$ position
+- Call APIs get $m \times K$ response
+- Filter APIs for LM loss reduction $\ge$ $T_f$
+- Augment corpus with remaining APIs
+
+</div>
+
+<div>
+
+**LLM finetuing & prediction**
+- Finetuning using standard LM objective
+- Decoding as usual, stop when meeting $\rightarrow$, call corresponding API
+- Fill text with API reponse, continue decoding
+
+</div>
+
+</div>
+
+![width:1024px](img/toolformer-keysteps.png)
+
+<!-- _footer: '[Toolformer: Language Models Can Teach Themselves to Use Tools, 2023, MetaAI](https://arxiv.org/abs/2302.04761)' -->
+
+---
+
+## Prompt & tools involved in Toolformer
+
+<div class='columns2'>
+
+<div>
+
+**Tools involved**
+- Question Answering: 
+  - Atlas(Retrieval augmented QA LM)
+- Calculator
+- Wikipedia Search: 
+  - BM25 retrieval for wikidump
+- Machine Translation System
+  - any lang to English trans(NLLB)
+- Calendar
+
+</div>
+
+<div>
+
+**Prompt for QA Tool**
+![width:400px](img/toolformer-prompt-qa.png)
+
+</div>
+
+</div>
+
+---
+
+## Results and limitations
+
+<div class='columns2'>
+
+<div>
+
+**Experiment settings & results**
+- GPT-J(6B) finetuned with CCNet(HQ subset of C4)
+- Toolformer outperforms on QA/MLQA/math reasoning/Temporal Datasets, e.g. 3 LAMA QA subsets
+
+![width:400px](img/toolformer-result-lama.png)
+
+</div>
+
+<div>
+
+**Limitations**
+- No capability of tools in a chain
+- No tool interaction like WebGPT
+- Sensitive to exact wording of input
+
+</div>
+
+</div>
+
+---
+
 <!-- _backgroundColor : gray -->
 <!-- _color : white -->
 ## End of Augmented Language Models
@@ -1143,8 +1281,8 @@ Agent(backed by LLM) drives everything
 - **prompt** with examples of planning and step-by-step actions
 - **weak(description in prompt)** tool operating manual
 - interact between LLM and tool with ```stop``` argument 
-- reasoning trace stored in ```scrathpad```
-- ```memory``` supported for chat history buffer
+- reasoning trace stored in ```scratchpad```: *short memory*
+- ```memory``` supported for chat history buffer: *long memory*
 
 </div>
 
@@ -1187,10 +1325,10 @@ ChatGPT drives everything
 - Session Runner:
   - dispatch query
   - maintain the running chat log
-- Fixie Agent:
+- Fixie Agent(LLM):
   - break query into steps
   - dispatch to Router
-- Router Agent: 
+- Router Agent(Neural Search):
   - match query/agent by neural search
   - agent represented by sample queries
 
@@ -1210,9 +1348,10 @@ ChatGPT drives everything
 
 ## Other examples in application
 
-- ToT
-- TaskMatrix.AI
-- LATM
+- MM-ReAct: Microsoft
+- TaskMatrix.AI: Microsoft
+- Tree-of-Thoughts: Princeton University/Deepmind
+- LLMs As Tool Makers: Princeton University/Deepmind
 
 ---
 <!-- _backgroundColor : gray -->

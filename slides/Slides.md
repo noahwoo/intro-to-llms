@@ -175,6 +175,37 @@ Model training flops utilization(MFU):
 
 <!-- _footer: '[PaLM: Scaling Language Modeling with Pathways, 2022, Google](https://arxiv.org/abs/2204.02311) <br> [Chinchilla: Training Compute-Optimal Large Language Models, 2022, Google](https://arxiv.org/abs/2203.15556)'-->
 
+--- 
+
+### Scaling laws and compute optimal LLM training
+
+Optimal combination of model size $N$ and token size $D$, given the computation FLOPS $C$
+<div class='columns2'>
+
+<div>
+
+**Optimal $N$ and $D$:**
+- $N_{\text{opt}} \propto {N}^a$ 
+- $D_{\text{opt}} \propto {D}^b$
+- OpenAI(2020) : $a=0.73, b=0.27$
+- Deepmind(2022) : $a=0.5, b=0.5$ 
+  - Match between training tokens and LR schedule
+  - Tested on larger model size($\gt 500M$ vs. $\lt 100M$)
+- Optimal ratio: $N:D \simeq 1:20$
+
+</div>
+
+<div>
+
+**IsoFLOP profiles(Deepmind, 2022):**
+![width:400px](img/chinchilla-opt-ND.png)
+
+</div>
+
+</div>
+
+<!-- _footer: '[Scaling Laws for Neural Language Models, 2020, Deepmind](https://arxiv.org/abs/2204.02311) <br> [Chinchilla: Training Compute-Optimal Large Language Models, 2022, Google](https://arxiv.org/abs/2203.15556)'-->
+
 ---
 <!-- _backgroundColor : black -->
 <!-- _color : white -->
@@ -451,6 +482,7 @@ ColossalAI
 
 <div>
 
+**Evaluation Set**
 - CLUE/SuperCLUE
 - MMLU
 - MATH
@@ -460,7 +492,7 @@ ColossalAI
 
 <div>
 
-C-Eval Accuracy: <span style="color:#D3D3D3">YY: 47+ </span>
+**C-Eval Accuracy**: <span style="color:#D3D3D3">YY: 47+ </span>
 
 ![width:300px](img/ceval-validation-result.png)
 
@@ -1020,6 +1052,30 @@ is 1,800 to 7,000 ft.
 
 ---
 
+## Pros and Cons of Prompt-based augmentation
+
+<div class='columns2'>
+
+<div>
+
+**Pros**
+- Flexible for application
+- Add new tool in low cost
+
+</div>
+
+<div>
+
+**Cons**
+- Unstable response
+- Token inefficient
+
+</div>
+
+</div>
+
+---
+
 ## Augment LM with retrieval end-to-end: REALM(pretraining)
 
 - Two steps of *retrieve* and *predict*
@@ -1312,8 +1368,9 @@ ChatGPT drives everything
   - Which to call
   - How to call
   - Synthesis results
+- Released ```functions``` argument in Chat Completions API
 
-<!-- [Chat Plugins](https://platform.openai.com/docs/plugins/introduction) -->
+<!-- _footer: '[Chat Plugins](https://platform.openai.com/docs/plugins/introduction) <br> [functions argument use case](https://github.com/openai/openai-cookbook/blob/main/examples/How_to_call_functions_with_chat_models.ipynb)' -->
 ---
 
 ## Fixie's(startup raised 17M$) proposal

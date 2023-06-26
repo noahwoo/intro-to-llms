@@ -134,6 +134,7 @@ math: mathjax
     - TransformerXL
   - Attention matrix approximation:
     - Linear Transformer
+    - RWKV
 - LLMs specific
   - **Encoder** vs **Decoder** vs **Encoder-Decoder**
   - Pretraining objective
@@ -483,10 +484,13 @@ ColossalAI
 <div>
 
 **Evaluation Set**
-- CLUE/SuperCLUE
+- GLUE/SuperGLUE
 - MMLU
-- MATH
 - C-Eval
+- AGIEval
+- MATH
+- HumanEval
+- Big-bench(Hard)
 
 </div>
 
@@ -515,7 +519,7 @@ ColossalAI
 
 ### Target and issues
 - Target
-  - From pattern completion to real world tasks
+  - From pattern completion to real world task completion
 - Issues
   - Instruction following
   - Hallucination
@@ -524,7 +528,7 @@ ColossalAI
 
 ---
 
-### Instruct Finetuning
+## Instruction Finetuning
 
 <div class='columns2'>
 
@@ -549,7 +553,101 @@ Key to success
 
 ---
 
-### Finetuning for specific task
+### Aligning Language Models with Self-Generated Instructions: Self-instruct
+
+![width:1024px](img/self-instruct.png)
+
+<!-- _footer: '[Self-Instruct: Aligning Language Models with Self-Generated Instructions, 2022, University of Washington](https://arxiv.org/abs/2212.10560)' -->
+
+---
+
+### Distill Large Foundation Model(LFM) with instruction tuning: LLaMA series
+
+
+| Model Name | #Instructions | #(Base Model) | Finetuning | Instruction Synthetic |  Org.    |
+|------------|------------------|----------------|-------------------|------------|----------|
+| Alpaca     | 52K              | 7B             | Full   | Self-instruct  | Stanford        |
+| Vicuna     | 70K              | 13B            | Full   | ShareGPT       | LM              |
+| Dolly      | 15K              | 12B            | Full   | Human          | Databricks      |
+| WizardLM   | 250K             | 16B            | Full   | Evol-Instuc    | Microsoft       |
+| Guanaco    | 88K              | 65B            | QLoRA  | OASST1(dialog) | UW              |
+  
+<!-- _footer: '[QLoRA: Efficient Finetuning of Quantized LLMs, 2023, University of Washington](https://arxiv.org/abs/2305.14314) <br> [WizardLM: Empowering Large Language Models to Follow Complex Instructions, 2023, Microsoft](https://arxiv.org/abs/2304.12244) <br> [Vicuna: An Open-Source Chatbot Impressing GPT-4 with 90%* ChatGPT Quality](https://lmsys.org/blog/2023-03-30-vicuna/)  <br> [Alpaca: A Strong, Replicable Instruction-Following Model, 2023, Stanford](https://crfm.stanford.edu/2023/03/13/alpaca.html)'-->
+
+---
+
+### Different voice from UC Berkeley
+
+<div class='columns2_left_2o3'>
+
+<div>
+
+Method and evaluation in brief:
+- Base model size from 1.5B(**GPT-2**) to 13B(**LLaMA**)
+- Imitation tokens from 0.3M to 150M(**NQ-synthetic** + **ShareGPT**)
+- Evaluation: Crowdworkers + NLP tasks(Auto)
+
+Conclusion:
+- Imitation models are rated high by crowdworkers(**top**)
+- Scaling imitation data not work on 3-shot NQ(**mid.**)
+- Scaling base model parameters size helps(**bottom**)
+- Mimicks ChatGPT's style not facturality capability
+- Enormous and diverse imitation dataset required
+
+</div>
+
+<div>
+
+![width:250px](img/false-promise-left.png)
+![width:250px](img/false-promise-middle.png)
+![width:250px](img/false-promise-right.png)
+
+</div>
+
+</div>
+
+<!-- _footer: '[The False Promise of Imitating Proprietary LLMs, 2023, UC Berkeley](https://arxiv.org/abs/2305.15717)' -->
+
+---
+
+### Scaling the size of instructions from LFM: Orca
+
+<div class='columns2_left_2o3'>
+
+<div>
+
+- Enriching Imitation signal: 
+  - explanation traces
+  - step-by-step thought
+- Scaling instructions
+  - Initiated from FLAN-v2 collection
+  - 5M instructions from ChatGPT(TA)
+  - 1M instructions from GPT-4
+- Rigorous Evaluations
+  - Open-ended Generation: 
+    - Vicuna/Awesome/WizardLM Prompts
+  - Reasoning: AGIEval/Big-bench Hard/
+  - Safety: TruthfulQA-MC
+
+</div>
+
+<div>
+
+![width:500px](img/orca-result.png)
+Conclusion: 
+- **Explanation Tuning** effectively aligns smaller model to GPT-4
+- Imitation **data size** and **coverage** is crucial
+
+</div>
+
+</div>
+
+
+<!-- _footer: '[Orca: Progressive Learning from Complex Explanation Traces of GPT-4, 2023, Microsoft](https://arxiv.org/abs/2306.02707)' -->
+
+---
+
+## Finetuning for specific task
 
 <style>
 img[alt~="center"] {
@@ -1411,20 +1509,15 @@ ChatGPT drives everything
 - LLMs As Tool Makers: Princeton University/Deepmind
 
 ---
+
+![width:1000px](img/LLM_App_Stack.jpeg)
+
+---
 <!-- _backgroundColor : gray -->
 <!-- _color : white -->
 ## End of Plugins
 
 --- 
-
-## Open Source World
-
-- Alpaca
-- Vicuna
-- RWKV
-- Guanaco
-
----
 
 ## Important but not covered
 

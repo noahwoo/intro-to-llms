@@ -569,7 +569,7 @@ Key to success
 | Alpaca     | 52K              | 7B             | Full   | Self-instruct  | Stanford        |
 | Vicuna     | 70K              | 13B            | Full   | ShareGPT       | LM              |
 | Dolly      | 15K              | 12B            | Full   | Human          | Databricks      |
-| WizardLM   | 250K             | 16B            | Full   | Evol-Instuc    | Microsoft       |
+| WizardLM   | 250K             | 16B            | Full   | Evol-Instuct   | Microsoft       |
 | Guanaco    | 88K              | 65B            | QLoRA  | OASST1(dialog) | UW              |
   
 <!-- _footer: '[QLoRA: Efficient Finetuning of Quantized LLMs, 2023, University of Washington](https://arxiv.org/abs/2305.14314) <br> [WizardLM: Empowering Large Language Models to Follow Complex Instructions, 2023, Microsoft](https://arxiv.org/abs/2304.12244) <br> [Vicuna: An Open-Source Chatbot Impressing GPT-4 with 90%* ChatGPT Quality](https://lmsys.org/blog/2023-03-30-vicuna/)  <br> [Alpaca: A Strong, Replicable Instruction-Following Model, 2023, Stanford](https://crfm.stanford.edu/2023/03/13/alpaca.html)'-->
@@ -656,9 +656,9 @@ img[alt~="center"] {
 }
 </style>
 
-![width:900px center](img/img-canvas/fine-tune.png)
+![width:1000px center](img/img-canvas/fine-tune2.png)
 
-<!-- _footer: '[Finetune from HF(OpenAI):1909.08593](https://arxiv.org/abs/1909.08593)  <br> [Summarize from HF(OpenAI):2009.01325](https://arxiv.org/abs/2009.01325) <br> [HHHA(Anthropic):2112.00861](https://arxiv.org/abs/2112.00861) <br> [InstructGPT(OpenAI):2203.02155](https://arxiv.org/abs/2203.02155) <br> [HHA(Anthropic):2204.05862](https://arxiv.org/abs/2204.05862) <br>[Sparrow(Deepmind):2209.14375](https://arxiv.org/abs/2209.14375)'-->
+<!-- _footer: '[Finetune from HF(OpenAI):1909.08593](https://arxiv.org/abs/1909.08593) <br> [HHHA(Anthropic):2112.00861](https://arxiv.org/abs/2112.00861) <br> [InstructGPT(OpenAI):2203.02155](https://arxiv.org/abs/2203.02155) <br> [HHA(Anthropic):2204.05862](https://arxiv.org/abs/2204.05862) <br>[Sparrow(Deepmind):2209.14375](https://arxiv.org/abs/2209.14375)'-->
 
 --- 
 
@@ -894,7 +894,7 @@ Why it works?
 - Pros and Cons in vanilla LLMs
 - Augmentation
    - Reasoning/Planning
-   - Tool usage
+   - Action/Tool usage
 
 ---
 
@@ -937,8 +937,9 @@ Cons
 <div>
 
 - 2-step loops in augmenting
-  - What: Planning/Reasoning
-  - How: Tool usage
+  - What: Reasoning/Planning
+  - How: Action/Tool Usage
+- Equiped with **memory**: Short/Long Term
 
 </div>
 
@@ -1456,6 +1457,9 @@ Implemented Agents
 
 ---
 
+## More on Langchain
+
+---
 ## ChatGPT Plugins
 
 ChatGPT drives everything
@@ -1509,8 +1513,9 @@ ChatGPT drives everything
 - LLMs As Tool Makers: Princeton University/Deepmind
 
 ---
+## LLM TechStack for in-context learning Application
 
-![width:1000px](img/LLM_App_Stack.jpeg)
+![width:950px](img/LLM_App_Stack.png)
 
 ---
 <!-- _backgroundColor : gray -->

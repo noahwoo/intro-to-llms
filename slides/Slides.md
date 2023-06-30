@@ -21,12 +21,13 @@ style: |
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 1rem;
-  } 
+  }
 
   img[alt~="center"] {
     display: block;
     margin: 0 auto;
   }
+
   .fa-twitter { color: aqua; }
   .fa-mastodon { color: purple; }
   .fa-linkedin { color: blue; }
@@ -61,7 +62,7 @@ math: mathjax
 1. [Transformer in nutshell](#transformer-in-nutshell)
 1. [Pretraining - Parallel paradigm](#pretraining)
 1. [Finetuning - Parameter efficient finetuning](#finetuning)
-1. [Steering the decoding of LLM - Prompting](#steering-the-decoding-process-of-llm)
+1. [Steering the decoding of LLM - Prompt](#steering-the-decoding-process-of-llm)
 1. [Augmentation and Plugins](#augmentation-and-plugins)
 
 ---
@@ -73,6 +74,7 @@ math: mathjax
 - Primary steps of new paradigm
   - Pretraining with self-supervised learning
   - Finetuning on instruction from mutiple domains
+  - Supervised Finetuning & RLFH
   - Application by steering/prompt the decoding process of LLM
 - Where are we to AGI?
   - From explanation to prediction
@@ -154,7 +156,7 @@ math: mathjax
    - FFN: $L \times ((d \times 4d + 4d) + (4d \times d + d)) \approx 8Ld^2$
 - On GPT3-175B:
 
- | Total | PE | TE | Attn | FFN | 
+ | Total | PosEnc | TermEnc | Attn | FFN | 
  | --- | --- | --- | --- | --- | 
  | 174,597M | 25M(0.01%) | 617M(0.35%) | 57,982M(33.21%) | 115,970M(66.42%) |
 
@@ -186,8 +188,8 @@ Optimal combination of model size $N$ and token size $D$, given the computation 
 <div>
 
 **Optimal $N$ and $D$:**
-- $N_{\text{opt}} \propto {N}^a$ 
-- $D_{\text{opt}} \propto {D}^b$
+- $N_{\text{opt}} \propto {C}^a$ 
+- $D_{\text{opt}} \propto {C}^b$
 - OpenAI(2020) : $a=0.73, b=0.27$
 - Deepmind(2022) : $a=0.5, b=0.5$ 
   - Match between training tokens and LR schedule
@@ -245,7 +247,7 @@ Optimal combination of model size $N$ and token size $D$, given the computation 
   - [StackExchange](https://archive.org/details/stackexchange) : Question & Answer w/ score
 - Supervised text: task related
   - ~16 NLP tasks related datasets (Sentiment/QA/Reasoning, etc.)
-  - Human answer to prompt: InstructGPT
+  - Human answer to prompt: InstructGPT/ShareGPT
 
 ![bg right:30% fit](img/img-canvas/dataset.png)
 
@@ -405,20 +407,42 @@ for layer_i in layers:
 </div>
 
 </div>
+
 <!-- _footer: '[Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism, Nvida, 2019](https://arxiv.org/abs/1909.08053)' -->
 
 --- 
 
-### Performance comparison of ZeRO and Megatron-LM
+### Performance comparison of Megatron-LM and ZeRO
+
+<div class='columns2_left_2o3'>
+
+<div>
+
 - Experiment hardware: 
-  - Megatron-LM: 32 DGX-2H servers: 512 V100, 32GB GPUs
-  - ZeRO: 25 DGX-2 servers: 400 V100, 32GB GPUs
+  - **Megatron-LM**: 32 DGX-2H servers: 512 V100, 32GB
+  - **ZeRO**: 25 DGX-2 servers: 400 V100, 32GB
   
-- TFlops Results:
-  - Megatron-LM: 15.1 PFlops 
-    - 76% scaling efficiency for single GPU 39TFlops(30% of peak Flops)
-  - ZeRO: 15 PFlops, with fewer GPU cores
-  
+- Flops and MFU:
+  - **Megatron-LM**: 15.1 PFlops, 8.3B Model
+    - 29.5 TFlops/GPU (=76% $\times$ 39 TFlops single GPU, 30% of peak Flops)
+    - **MFU=76% $\times$ 30%=22.8%** 
+  - **ZeRO**: 15 PFlops, 100B Model
+    - 38 TFlops/GPU
+
+</div>
+
+<div>
+
+Speedup for **Megatron-ML**:
+![width:400px](img/megatron-scaling.png)
+
+Speedup for **ZeRO**:
+![width:400px](img/zero-scaling.png)
+
+</div>
+
+<div>
+
 ---
 ### Pipeline parallel: GPipe
 
@@ -488,8 +512,8 @@ ColossalAI
 - MMLU
 - C-Eval
 - AGIEval
-- MATH
-- HumanEval
+- GSM8k/MATH
+- HumanEval(code)
 - Big-bench(Hard)
 
 </div>
@@ -658,12 +682,12 @@ img[alt~="center"] {
 
 ![width:1000px center](img/img-canvas/fine-tune2.png)
 
-<!-- _footer: '[Finetune from HF(OpenAI):1909.08593](https://arxiv.org/abs/1909.08593) <br> [HHHA(Anthropic):2112.00861](https://arxiv.org/abs/2112.00861) <br> [InstructGPT(OpenAI):2203.02155](https://arxiv.org/abs/2203.02155) <br> [HHA(Anthropic):2204.05862](https://arxiv.org/abs/2204.05862) <br>[Sparrow(Deepmind):2209.14375](https://arxiv.org/abs/2209.14375)'-->
+<!-- _footer: '[Finetune from HF(OpenAI):1909.08593](https://arxiv.org/abs/1909.08593) <br> [HHHA(Anthropic):2112.00861](https://arxiv.org/abs/2112.00861) <br> [InstructGPT(OpenAI):2203.02155](https://arxiv.org/abs/2203.02155) <br> [HHA(Anthropic):2204.05862](https://arxiv.org/abs/2204.05862) <br> [AlpacaFarm: 2305.14378](https://arxiv.org/abs/2305.14387)'-->
 
 --- 
 
 ### Problems with Supervised Finetuning(SFT)
-- Learning only the task format and the way to response for the format
+- Learning only the **task format** and the **way to response** for the format
 - Knowledge labeled but not in the LLM leads to more hallucination
 - Knowledge in the LLM but labeled as `don't know` leads to withhold information
 
@@ -680,7 +704,7 @@ What we want from finetuning:
 - RLHF can leverage the self-awareness
   - Design reward function: `correct answer=1`, `don't know=0` and `wrong answer=-4`
   - RL learn optimal threshold of probability to maximize the reward
-- No oracle for the correctness, delegate to Reward Model
+- No oracle for the correct reward, delegate to Reward Model
   - Reward model: **relative criteria** trained by pairwise loss from human feedback
   - Open problem: true probabilites of everything?
   - Open problem: go beyond things that labelers can easily do
@@ -749,7 +773,7 @@ PEFT illustration and performance comparison (Source: [Junxian He, et.al](https:
 ---
 
 ### Design aspects
-- **Finetuned Modules**:
+- **Modules Finetuned**:
   - Attention-key/value matrix: LoRA(Q/V)
   - Attention-head: Prefix-Tuning(K/V)
   - Attention: Adapter
@@ -761,6 +785,10 @@ PEFT illustration and performance comparison (Source: [Junxian He, et.al](https:
 ---
 ### Adapter
 
+<div class='columns2_left_2o3'>
+
+<div>
+
 - Implementation & training notes
   - $h \leftarrow h + f(h W_{\text{down}})W_{\text{up}}$
   - Parameter scale: $2 \times L \times (r \times d + r + d), r \ll d$
@@ -770,7 +798,17 @@ PEFT illustration and performance comparison (Source: [Junxian He, et.al](https:
     - 3.6% parameters for 0.4% GLUE performance gap
   - Ablation: fewer layers adapted -> worser performance
 
-![bg right:30% fit](img/adapter-perf.png)
+</div>
+
+<div>
+
+**Accuracy** relative to full-tuning:
+
+![width:400px](img/adapter-perf.png)
+
+</div>
+
+</div>
 
 <!-- _footer: '[Adapter: Parameter-Efficient Transfer Learning for NLP, Google, 2019](https://arxiv.org/abs/1902.00751)'-->
 
@@ -791,10 +829,10 @@ PEFT illustration and performance comparison (Source: [Junxian He, et.al](https:
 ---
 ### More on Prefix-Tuning: Training and scaling
 - Training
-  - Initialization: 
+  - **Initialization**:
     - Real/high frequency words activation
     - *Task relevant words* / *Classification labels*
-  - LM Head: Next Token/Class Label
+  - **LM Head**: Next Token/Class Label
 - Results & discussion
   - Finetuning $0.1\% \sim 3\%$ parameters, comparable or better performance
   - Optimal prefix length varies: longer for more complex tasks
@@ -805,11 +843,11 @@ PEFT illustration and performance comparison (Source: [Junxian He, et.al](https:
 ---
 ### LoRA
 - Implementation & training notes
-  - Transformer: $W = W_0 + (BA)^T, A \in R^{r \times d}, B \in R^{d_h \times r}, r \ll \min \{d_h, d\}$
-  - $W_Q$ and $W_V$ considered, parameter scale: $2 \times 2 \times d \times r \times L$
-  - Modularized: `Embedding`, `Linear`, `MergedLinear`, `Conv2D`
-  - Initialization: $A$ kaiming-random, $B$ zeros
-  - Weight merged for inference efficiency
+  - **Low-Rank**: $W = W_0 + (BA)^T, A \in R^{r \times d}, B \in R^{d_h \times r}, r \ll \min \{d_h, d\}$
+  - $W_Q$ and $W_V$ considered, parameter scale: $2(AB) \times 2(QV) \times d \times r \times L$
+  - **Modularized**: `Embedding`, `Linear`, `MergedLinear`, `Conv2D`
+  - **Initialization**: $A$ kaiming-random, $B$ zeros
+  - **Weight merged** for inference efficiency
 - Results
   - For 175B GPT-3 finetuning: 0.01% parameters , on par or better results
   - No additional inference computation and latency
@@ -855,7 +893,7 @@ PEFT illustration and performance comparison (Source: [Junxian He, et.al](https:
 ### Prompt engineering
 - One-shot interaction
   - Instruction/Zero-shot Prompt
-  - Few-shot Promp
+  - Few-shot Prompt
   - In-context Learning(Prompt)
   - Chain-of-Thought
 - Recursive interaction
@@ -898,7 +936,7 @@ Why it works?
 
 ---
 
-## Pros and Cons in vanilla LLMs
+## Pros and Cons in vanilla(no-augmented) LLMs
 
 <div class='columns2'>
 
@@ -1160,6 +1198,7 @@ is 1,800 to 7,000 ft.
 **Pros**
 - Flexible for application
 - Add new tool in low cost
+- Easy to explanation
 
 </div>
 
@@ -1167,6 +1206,8 @@ is 1,800 to 7,000 ft.
 
 **Cons**
 - Unstable response
+- Rely on top performed LLMs
+- Limited by context window size
 - Token inefficient
 
 </div>
@@ -1181,7 +1222,7 @@ is 1,800 to 7,000 ft.
   - $P(y|x) = \sum_z P(y|z,x) P(z|x)$
   - *Neural retrieval*: $P(z|x) = \text{Softmax}_z (\text{BERT}_{\text{CLS}}(x)^T \text{BERT}_{\text{CLS}}(z))$
   - *Knowledge-augmented encoder*: $P(y|z,x)$
-    - Pretraining: MLM loss of BERT
+    - Pretraining: Masked Language Model loss of BERT
     - Finetuning: Reading Comprehension loss of BERT(assume $y \in z$)
 - Practical training
   - Involve top-K documents of $P(z|x)$
@@ -1227,7 +1268,7 @@ is 1,800 to 7,000 ft.
   - **Behavior Cloning(BC)**: Supervised finetune with human *demonstrations*
   - **Reward Modeling(RM)**: Train with *comparison* feedback based on BC model
   - **Reinforcement Learning**: Finetune BC model with RM reward and BC KL penalty
-  - Generation with **rejection sampling**: BC/RL on RM
+  - Generation with **rejection sampling**: BC/RL on RM(Best-of-n)
 <!-- _footer: '[WebGPT: Browser-assisted question-answering with human feedback, 2021, OpenAI](https://arxiv.org/abs/2112.09332)' -->
 
 ---
@@ -1299,7 +1340,7 @@ is 1,800 to 7,000 ft.
 <div>
 
 **Corpus annotation**
-- Prompt LM(tool-wise) and sampling $m$ tools for top-$K$ position
+- Prompt LM(for each tool) and sampling **$m$** tools for **top-$K$** position
 - Call APIs get $m \times K$ response
 - Filter APIs for LM loss reduction $\ge$ $T_f$
 - Augment corpus with remaining APIs
@@ -1464,7 +1505,7 @@ Implemented Agents
 
 ChatGPT drives everything
 - Plugin description(in manifest) matters
-- OpenAPI markdown for tool usage
+- OpenAPI markdown for tool specification
 - Orchestrate by ChatGPT during conversation
   - When to call
   - Which to call
@@ -1485,11 +1526,11 @@ ChatGPT drives everything
   - dispatch query
   - maintain the running chat log
 - Fixie Agent(LLM):
-  - break query into steps
+  - break query into sub-queries
   - dispatch to Router
 - Router Agent(Neural Search):
   - match query/agent by neural search
-  - agent represented by sample queries
+  - agent represented by query samples 
 
 </div>
 
@@ -1505,7 +1546,7 @@ ChatGPT drives everything
 
 ---
 
-## Other examples in application
+## Other agent examples in application
 
 - MM-ReAct: Microsoft
 - TaskMatrix.AI: Microsoft

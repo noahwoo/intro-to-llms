@@ -136,13 +136,13 @@ math: mathjax
     - TransformerXL
   - Attention matrix approximation:
     - Linear Transformer
-    - RWKV
 - LLMs specific
-  - **Encoder** vs **Decoder** vs **Encoder-Decoder**
-  - Pretraining objective
-  - Positional encoding
-  - Input or output LayerNorm
-  - Activation
+  - Encoder vs **Decoder** vs Encoder-Decoder
+  - Positional encoding: 
+    - Absolute/**Relative**
+    - Learned/**Fixed**
+  - LayerNorm: **Input**/Output
+  - Activation: GeLU
 
 ![bg fit right:30%](img/img-canvas/attn-matrix.png)
 

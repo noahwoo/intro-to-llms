@@ -936,7 +936,7 @@ Why it works?
 
 ---
 
-## Pros and Cons in vanilla(no-augmented) LLMs
+## Pros and Cons in vanilla(no-augmentation) LLMs
 
 <div class='columns2'>
 

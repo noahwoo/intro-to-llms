@@ -301,8 +301,8 @@ Optimal combination of model size $N$ and token size $D$, given the computation 
     - Optimizer State(FP32): parameter, momentum($m$), variance($v$)
     - Activation(FP16): $2 \times (1 + 4 + 1) \times d \times B \times T \times L$
   - A100 Spec: 
-    - GPU memory: 80GB
-    - GPU memory bandwidth: 2039GB/s; NVLink: 600GB/s; PCIe 4.0: 64GB/s
+    - GPU memory: 20MB SRAM, 80GB HBM
+    - GPU memory bandwidth: SRAM 19TB/s; HBM 2039GB/s; NVLink: 600GB/s; PCIe 4.0: 64GB/s
     - TF32: 156TFlops
 - Speedup
   - Scales linearly with # of GPU cores?

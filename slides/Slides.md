@@ -77,7 +77,11 @@ math: mathjax
 
 # **Introduction to Large Language Models(LLM)**
 
+<!-- <p style="text-align:center"><span style="color:#808080"> 吴健民 (ACG Baidu)</span></p> -->
+
 </font>
+
+
 
 </div>
 
@@ -329,10 +333,14 @@ Optimal combination of model size $N$ and token size $D$, given the computation 
   - Model parallel
     - Tensor parallel: Megatron-LM
     - Pipeline parallel: GPipe
-- Combined implementations: DeepSpeed/ColossalAI
+- Combined implementations: Megatron-LM
+- More combined implementations: DeepSpeed-Megatron/ColossalAI
+
 ---
 
 ### Why bother?
+
+<font size='5'>
 
 - Too big to fit in single GPU memory
   - 175B: $\sim (2+2+3 \times 4) \times 175=2800$GB for mixed-precision training
@@ -345,6 +353,8 @@ Optimal combination of model size $N$ and token size $D$, given the computation 
     - TF32: 156TFlops
 - Speedup
   - Scales linearly with # of GPU cores?
+
+</font>
 
 ---
 ### Basics on Forward & Backward and Parallel Ops
@@ -456,6 +466,7 @@ for layer_i in layers:
 <div class='columns2_left_2o3'>
 
 <div>
+<font size='5'>
 
 - Experiment hardware: 
   - **Megatron-LM**: 32 DGX-2H servers: 512 V100, 32GB
@@ -467,7 +478,7 @@ for layer_i in layers:
     - **MFU=76% $\times$ 30%=22.8%** 
   - **ZeRO**: 15 PFlops, 100B Model
     - 38 TFlops/GPU
-
+</font>
 </div>
 
 <div>

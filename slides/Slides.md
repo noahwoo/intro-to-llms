@@ -492,6 +492,8 @@ Speedup for **ZeRO**:
 - Layer-wise model partition
 - Re-materializaion: output activation stored and communicated
 - Pipeline reduce bubble ratio from $\frac{K-1}{K}$ to $\frac{K-1}{M+K-1}$
+  - $K$: #pipe stages
+  - $M$: #microbatch
 
 </div>
 
@@ -503,8 +505,43 @@ Speedup for **ZeRO**:
 
 <!-- _footer: '[GPipe: Efficient Training of Giant Neural Networks using Pipeline Parallelism, Google, 2018](https://arxiv.org/abs/1811.06965)' -->
 
+--- 
+
+## Combined implementation: Megatron-LM
+
+<div class='columns2_left_1o3'>
+
+<font size='5'>
+<div>
+
+Combination: 3D-$(t, d, p)$
+- $g = t + S_t \times d + S_t S_d \times p$
+- GPUs-Node allocation:
+  - Tensor Parallel: **within** node
+  - Data Parallel: **within** node
+  - Pipe Parallel: **cross** node
+</div>
+</font>
+
+<div>
+
+<font size='5'>
+
+**Practical** Pipe Schedule: 
+![width:600px](img/megatron-lm-pipe-schedule-default.png)
+![width:600px](img/megatron-lm-pipeline-schedule-1f1b-interleave.png)
+
+</font>
+
+</div>
+
+</div>
+
+<!-- _footer: '[Efficient Large-Scale Language Model Training on GPU Clusters Using Megatron-LM,2021,Nvidia](https://arxiv.org/abs/2104.04473)' -->
+
 ---
-### Combined implementations: Megatron-DeepSpeed/ColossalAI
+
+### More Combined implementations: Megatron-DeepSpeed/ColossalAI
 
 <div class='columns2'>
 

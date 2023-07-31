@@ -169,6 +169,9 @@ math: mathjax
 <!-- _footer: '[nanoGPT](https://github.com/karpathy/nanoGPT)' -->
 ---
 ### Aspects of alternative
+
+<font size='5'>
+
 - Efficient Transformer (for long sequence)
   - Coarse sequence resolution: 
     - Block/Stride/Clustering/Neural Memory
@@ -180,8 +183,10 @@ math: mathjax
   - Positional encoding: 
     - Absolute/**Relative**
     - Learned/**Fixed**
-  - LayerNorm: **Input**/Output
-  - Activation: GeLU
+  - LayerNorm: **Pre-LN**/**Post-LN**
+  - Activation: GeLU/**SwiGLU**
+
+</font>
 
 ![bg fit right:30%](img/img-canvas/attn-matrix.png)
 
@@ -281,8 +286,8 @@ Optimal combination of model size $N$ and token size $D$, given the computation 
 
 ### Text Corpus
 - Unsupervised text
-  - [BookCorpus](https://yknzhu.wixsite.com/mbweb) : 11,000; [Gutenberg](https://www.gutenberg.org/) : 70,000 
   - [OpenWebText](https://skylion007.github.io/OpenWebTextCorpus/): 8M outlinks of Reddit.com
+  - [BookCorpus](https://yknzhu.wixsite.com/mbweb) : 11,000; [Gutenberg](https://www.gutenberg.org/) : 70,000 
   - [Common Crawl](https://commoncrawl.org/); [C4](https://www.tensorflow.org/datasets/catalog/c4)
   - Code: [BigQuery](https://cloud.google.com/bigquery?hl=zh-cn) [Github](https://huggingface.co/datasets/codeparrot/github-code)
 - Weak supervised text
@@ -295,9 +300,40 @@ Optimal combination of model size $N$ and token size $D$, given the computation 
 ![bg right:30% fit](img/img-canvas/dataset.png)
 
 ---
+
+### More on Text Corpus: Common Web vs. Special Corpus
+
+<div columns='columns2'>
+
+<div>
+
+**Mixture of data corpus**
+- [The Pile](https://github.com/EleutherAI/The-Pile): 825GB
+- [RefinedWeb(Falcon)](https://huggingface.co/datasets/tiiuae/falcon-refinedweb): 600B common web(5T)
+- [RedPajama](https://github.com/togethercomputer/RedPajama-Data): 1.2T with 157B special corpus
+- And more...
+
+</div>
+
+<div>
+
+**Data pipeline**
+- [CCNet](https://github.com/facebookresearch/cc_net)
+- MDR(MacroData Refinement)
+- And more...
+
+</div>
+
+</div>
+
+<!-- _footer: '[The RefinedWeb Dataset for Falcon LLM:Outperforming Curated Corpora withWeb Data, andWeb Data Only, 2023](https://arxiv.org/abs/2306.01116)' -->
+---
+
 ### Baidu Ernie 3.0 Titan: 260B
 
-<div class='columns2_left_2o3'>
+<div class='columns2'>
+
+<font size='5'>
 
 <div>
 
@@ -317,7 +353,9 @@ Optimal combination of model size $N$ and token size $D$, given the computation 
 
 <div>
 
-![width:400px](img/ernie-3.0.png)
+</font>
+
+![width:600px](img/ernie-3.0.png)
 
 </div>
 

@@ -77,7 +77,7 @@ math: mathjax
 
 # **Introduction to Large Language Models(LLM)**
 
-<!-- <p style="text-align:center"><span style="color:#808080"> 吴健民 (ACG Baidu)</span></p> -->
+<p style="text-align:center"><span style="color:#808080"> 吴健民 (ACG)</span></p>
 
 </font>
 
@@ -645,7 +645,7 @@ ColossalAI
 
 <div>
 
-**C-Eval Accuracy**: <span style="color:#D3D3D3">YY: 47+ </span>
+**C-Eval Accuracy**: <span style="color:#D3D3D3">YY: 50+ </span>
 
 ![width:300px](img/ceval-validation-result.png)
 
